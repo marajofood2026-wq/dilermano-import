@@ -20,6 +20,11 @@ interface ShippingOption {
 
 const CartPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [cep, setCep] = useState("");
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingRegion, setShippingRegion] = useState("");
   const { user } = useAuth();
 
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
