@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, LogOut, Shield } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LogOut, Shield, Package } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -69,6 +69,11 @@ const Header = () => {
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/meus-pedidos" className="flex items-center gap-2">
+                    <Package size={14} /> Meus Pedidos
+                  </Link>
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin" className="flex items-center gap-2">
@@ -76,6 +81,7 @@ const Header = () => {
                     </Link>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="flex items-center gap-2">
                   <LogOut size={14} /> Sair
                 </DropdownMenuItem>
