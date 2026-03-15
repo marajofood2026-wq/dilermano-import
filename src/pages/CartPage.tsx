@@ -183,47 +183,113 @@ const CartPage = () => {
           </div>
 
           {/* Summary */}
-          <div className="rounded-lg border border-border bg-card p-6">
-            <h2 className="text-lg font-bold text-foreground">Resumo</h2>
-            <div className="mt-4 space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">{formatPrice(totalPrice)}</span>
+          <div className="space-y-4">
+            {/* Shipping Calculator */}
+            <div className="rounded-lg border border-border bg-card p-6">
+              <div className="flex items-center gap-2">
+                <Truck size={16} className="text-primary" />
+                <h3 className="text-sm font-bold text-foreground">Calcular Frete</h3>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Frete</span>
-                <span className="text-foreground">
-                  {totalPrice >= freeShippingThreshold ? (
-                    <span className="text-[hsl(var(--badge-new))]">Grátis</span>
-                  ) : (
-                    "A calcular"
-                  )}
-                </span>
+              <div className="mt-3 flex gap-2">
+                <Input
+                  placeholder="00000-000"
+                  value={cep}
+                  onChange={(e) => setCep(formatCep(e.target.value))}
+                  maxLength={9}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleCalculateShipping}
+                  disabled={shippingLoading}
+                  variant="outline"
+                  size="sm"
+                >
+                  {shippingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Calcular"}
+                </Button>
               </div>
-              <div className="border-t border-border pt-3">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-foreground">Total</span>
-                  <span className="text-lg font-bold text-foreground">{formatPrice(totalPrice)}</span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  ou 10x de {formatPrice(totalPrice / 10)} sem juros
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={handleCheckout}
-              disabled={checkoutLoading}
-              className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
-            >
-              {checkoutLoading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
-              ) : (
-                <>Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" /></>
+              {shippingRegion && (
+                <p className="mt-2 text-xs text-muted-foreground">Região: {shippingRegion}</p>
               )}
-            </Button>
-            <Link to="/" className="mt-3 block text-center text-xs text-primary hover:underline">
-              Continuar comprando
-            </Link>
+              {shippingOptions.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {shippingOptions.map((opt) => (
+                    <button
+                      key={opt.service}
+                      onClick={() => setSelectedShipping(opt)}
+                      className={`flex w-full items-center justify-between rounded-md border p-3 text-left text-sm transition-colors ${
+                        selectedShipping?.service === opt.service
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:bg-muted"
+                      }`}
+                    >
+                      <div>
+                        <span className="font-medium text-foreground">{opt.service}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {opt.days} {opt.days === 1 ? "dia útil" : "dias úteis"}
+                        </span>
+                      </div>
+                      <span className="font-bold text-foreground">
+                        {opt.free ? (
+                          <span className="text-[hsl(var(--badge-new))]">Grátis</span>
+                        ) : (
+                          formatPrice(opt.price)
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Order Summary */}
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="text-lg font-bold text-foreground">Resumo</h2>
+              <div className="mt-4 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-foreground">{formatPrice(totalPrice)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Frete</span>
+                  <span className="text-foreground">
+                    {selectedShipping ? (
+                      selectedShipping.free ? (
+                        <span className="text-[hsl(var(--badge-new))]">Grátis</span>
+                      ) : (
+                        formatPrice(selectedShipping.price)
+                      )
+                    ) : totalPrice >= freeShippingThreshold ? (
+                      <span className="text-[hsl(var(--badge-new))]">Grátis</span>
+                    ) : (
+                      "A calcular"
+                    )}
+                  </span>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-foreground">Total</span>
+                    <span className="text-lg font-bold text-foreground">{formatPrice(orderTotal)}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    ou 10x de {formatPrice(orderTotal / 10)} sem juros
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
+                className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
+              >
+                {checkoutLoading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
+                ) : (
+                  <>Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" /></>
+                )}
+              </Button>
+              <Link to="/" className="mt-3 block text-center text-xs text-primary hover:underline">
+                Continuar comprando
+              </Link>
+            </div>
           </div>
         </div>
       </main>
