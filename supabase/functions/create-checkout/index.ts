@@ -23,17 +23,23 @@ serve(async (req) => {
       throw new Error("No items provided");
     }
 
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: "brl",
-        product_data: {
-          name: item.name,
-          images: item.image ? [item.image] : [],
+    const lineItems = items.map((item: any) => {
+      const images: string[] = [];
+      if (item.image && typeof item.image === "string" && item.image.startsWith("http")) {
+        images.push(item.image);
+      }
+      return {
+        price_data: {
+          currency: "brl",
+          product_data: {
+            name: item.name,
+            ...(images.length > 0 ? { images } : {}),
+          },
+          unit_amount: Math.round(item.price * 100),
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      };
+    });
 
     const sessionParams: any = {
       payment_method_types: ["card"],
