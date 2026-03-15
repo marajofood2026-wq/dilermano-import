@@ -64,6 +64,37 @@ const CartPage = () => {
   const freeShippingThreshold = 299;
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - totalPrice);
 
+  const handleCalculateShipping = async () => {
+    if (!cep || cep.replace(/\D/g, "").length !== 8) {
+      toast.error("Digite um CEP válido (8 dígitos)");
+      return;
+    }
+    setShippingLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("calculate-shipping", {
+        body: { cep, cartTotal: totalPrice },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setShippingOptions(data.options || []);
+      setShippingRegion(data.region || "");
+      setSelectedShipping(null);
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao calcular frete");
+    } finally {
+      setShippingLoading(false);
+    }
+  };
+
+  const formatCep = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 8);
+    if (digits.length > 5) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    return digits;
+  };
+
+  const shippingCost = selectedShipping?.price || 0;
+  const orderTotal = totalPrice + shippingCost;
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
