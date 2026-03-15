@@ -19,7 +19,6 @@ interface ShippingOption {
 }
 
 const CartPage = () => {
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [cep, setCep] = useState("");
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
