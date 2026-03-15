@@ -136,8 +136,16 @@ const CartPage = () => {
                 </p>
               </div>
             </div>
-            <Button className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
-              Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" />
+            <Button
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+              className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
+            >
+              {checkoutLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
+              ) : (
+                <>Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" /></>
+              )}
             </Button>
             <Link to="/" className="mt-3 block text-center text-xs text-primary hover:underline">
               Continuar comprando
