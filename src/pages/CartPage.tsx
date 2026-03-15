@@ -32,33 +32,15 @@ const CartPage = () => {
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const handleCheckout = async () => {
-    setCheckoutLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: {
-          items: items.map((i) => ({
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-          })),
-          customerEmail: user?.email,
-          successUrl: `${window.location.origin}/checkout/success`,
-          cancelUrl: `${window.location.origin}/carrinho`,
-        },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
-    } catch (err: any) {
-      toast.error("Erro ao iniciar checkout: " + (err.message || "Tente novamente"));
-    } finally {
-      setCheckoutLoading(false);
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error("Faça login para continuar");
+      navigate("/login");
+      return;
     }
+    navigate("/checkout");
   };
 
   const freeShippingThreshold = 299;
