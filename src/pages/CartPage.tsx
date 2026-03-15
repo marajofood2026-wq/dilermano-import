@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 
 const CartPage = () => {
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { user } = useAuth();
+
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
 
   const formatPrice = (v: number) =>
