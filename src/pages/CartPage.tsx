@@ -1,15 +1,51 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const CartPage = () => {
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { user } = useAuth();
+
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
 
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          items: items.map((i) => ({
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+            image: i.image,
+          })),
+          customerEmail: user?.email,
+          successUrl: `${window.location.origin}/checkout/success`,
+          cancelUrl: `${window.location.origin}/carrinho`,
+        },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao iniciar checkout: " + (err.message || "Tente novamente"));
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   const freeShippingThreshold = 299;
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - totalPrice);
@@ -129,8 +165,16 @@ const CartPage = () => {
                 </p>
               </div>
             </div>
-            <Button className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
-              Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" />
+            <Button
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+              className="mt-6 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
+            >
+              {checkoutLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
+              ) : (
+                <>Finalizar Compra <ArrowRight className="ml-2 h-4 w-4" /></>
+              )}
             </Button>
             <Link to="/" className="mt-3 block text-center text-xs text-primary hover:underline">
               Continuar comprando

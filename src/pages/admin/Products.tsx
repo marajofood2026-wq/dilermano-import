@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -67,6 +67,27 @@ const Products = () => {
   const generateSlug = (name: string) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+  const handleImageUpload = async (productId: string, file: File) => {
+    const ext = file.name.split(".").pop();
+    const path = `${productId}/${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("product-images").upload(path, file);
+    if (uploadError) {
+      toast.error("Erro no upload: " + uploadError.message);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
+    const { error: dbError } = await supabase.from("product_images").insert({
+      product_id: productId,
+      url: urlData.publicUrl,
+      is_primary: true,
+    });
+    if (dbError) {
+      toast.error("Erro ao salvar imagem: " + dbError.message);
+    } else {
+      toast.success("Imagem enviada!");
+    }
+  };
+
   const handleSave = async () => {
     const slug = form.slug || generateSlug(form.name);
     const payload = {
@@ -80,10 +101,13 @@ const Products = () => {
     };
 
     let error;
+    let productId = editId;
     if (editId) {
       ({ error } = await supabase.from("products").update(payload).eq("id", editId));
     } else {
-      ({ error } = await supabase.from("products").insert(payload));
+      const res = await supabase.from("products").insert(payload).select("id").single();
+      error = res.error;
+      productId = res.data?.id || null;
     }
 
     if (error) {
@@ -222,6 +246,18 @@ const Products = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <label className="cursor-pointer rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                        <ImageIcon size={14} />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(p.id, file);
+                          }}
+                        />
+                      </label>
                       <button onClick={() => handleEdit(p)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                         <Pencil size={14} />
                       </button>
