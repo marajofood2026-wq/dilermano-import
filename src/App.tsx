@@ -19,6 +19,7 @@ import CategoryPage from "./pages/CategoryPage";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/CartPage";
 import MyOrders from "./pages/MyOrders";
+import MyAccount from "./pages/MyAccount";
 import NotFound from "./pages/NotFound";
 
 import AdminLayout from "./layouts/AdminLayout";
