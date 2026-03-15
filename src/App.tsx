@@ -19,6 +19,7 @@ import CategoryPage from "./pages/CategoryPage";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/CartPage";
 import MyOrders from "./pages/MyOrders";
+import MyAccount from "./pages/MyAccount";
 import NotFound from "./pages/NotFound";
 
 import AdminLayout from "./layouts/AdminLayout";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/carrinho" element={<CartPage />} />
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/minha-conta" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
               <Route path="/meus-pedidos" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
               <Route path="/produto/:slug" element={<ProductPage />} />
               <Route path="/:slug" element={<CategoryPage />} />

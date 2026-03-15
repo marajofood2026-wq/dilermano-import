@@ -70,6 +70,11 @@ const Header = () => {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
+                  <Link to="/minha-conta" className="flex items-center gap-2">
+                    <User size={14} /> Minha Conta
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/meus-pedidos" className="flex items-center gap-2">
                     <Package size={14} /> Meus Pedidos
                   </Link>
