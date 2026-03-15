@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { label: "Novidades", href: "/novidades" },
@@ -12,6 +20,7 @@ const navLinks = [
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -53,9 +62,37 @@ const Header = () => {
           <button className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Buscar">
             <Search size={20} />
           </button>
-          <button className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Conta">
-            <User size={20} />
-          </button>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Conta">
+                  <User size={20} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-2 py-1.5">
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="flex items-center gap-2">
+                      <Shield size={14} /> Painel Admin
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={signOut} className="flex items-center gap-2">
+                  <LogOut size={14} /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/login" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Conta">
+              <User size={20} />
+            </Link>
+          )}
+
           <button className="relative text-muted-foreground transition-colors hover:text-foreground" aria-label="Carrinho">
             <ShoppingBag size={20} />
             <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-ocean text-[10px] font-bold text-primary-foreground">
@@ -78,6 +115,15 @@ const Header = () => {
               {link.label}
             </Link>
           ))}
+          {!user && (
+            <Link
+              to="/login"
+              className="block py-3 text-sm font-medium text-primary transition-colors hover:text-foreground"
+              onClick={() => setMobileOpen(false)}
+            >
+              Entrar / Cadastrar
+            </Link>
+          )}
         </nav>
       )}
     </header>
