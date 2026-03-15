@@ -6,8 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck } from "lucide-react";
 import { toast } from "sonner";
+
+interface ShippingOption {
+  service: string;
+  price: number;
+  original_price: number;
+  days: number;
+  free: boolean;
+}
 
 const CartPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
