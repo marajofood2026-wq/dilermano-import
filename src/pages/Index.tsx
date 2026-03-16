@@ -75,7 +75,7 @@ const Index = () => {
   };
 
   const getBadge = (p: Product): "novo" | "sale" | undefined => {
-    if (p.tags?.includes("novo")) return "novo";
+    if (p.is_new || p.tags?.includes("novo")) return "novo";
     if (p.tags?.includes("sale") || p.original_price) return "sale";
     return undefined;
   };
