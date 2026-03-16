@@ -47,6 +47,7 @@ interface Product {
   original_price: number | null;
   tags: string[] | null;
   is_featured: boolean;
+  is_new: boolean;
   categories: { name: string } | null;
   product_images: { url: string; is_primary: boolean }[];
 }
