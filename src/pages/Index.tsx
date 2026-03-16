@@ -47,6 +47,7 @@ interface Product {
   original_price: number | null;
   tags: string[] | null;
   is_featured: boolean;
+  is_new: boolean;
   categories: { name: string } | null;
   product_images: { url: string; is_primary: boolean }[];
 }
@@ -58,7 +59,7 @@ const Index = () => {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, price, original_price, tags, is_featured, categories(name), product_images(url, is_primary)")
+        .select("id, name, slug, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
         .eq("is_active", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
@@ -74,7 +75,7 @@ const Index = () => {
   };
 
   const getBadge = (p: Product): "novo" | "sale" | undefined => {
-    if (p.tags?.includes("novo")) return "novo";
+    if (p.is_new || p.tags?.includes("novo")) return "novo";
     if (p.tags?.includes("sale") || p.original_price) return "sale";
     return undefined;
   };

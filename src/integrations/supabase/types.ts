@@ -499,6 +499,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_featured: boolean | null
+          is_new: boolean | null
           length_cm: number | null
           low_stock_threshold: number | null
           name: string
@@ -524,6 +525,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_new?: boolean | null
           length_cm?: number | null
           low_stock_threshold?: number | null
           name: string
@@ -549,6 +551,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_new?: boolean | null
           length_cm?: number | null
           low_stock_threshold?: number | null
           name?: string
