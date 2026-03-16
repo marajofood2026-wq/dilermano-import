@@ -2,15 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Pencil, Trash2, Upload, ImageIcon } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -19,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ProductFormDialog, { emptyForm, generateSlug, type ProductFormData } from "@/components/admin/ProductFormDialog";
 
 interface Product {
   id: string;
@@ -28,6 +22,7 @@ interface Product {
   original_price: number | null;
   stock_quantity: number;
   is_active: boolean;
+  is_new: boolean;
   category_id: string | null;
   categories?: { name: string } | null;
 }
@@ -37,91 +32,33 @@ const Products = () => {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "",
-    slug: "",
-    price: "",
-    original_price: "",
-    stock_quantity: "",
-    description: "",
-    is_active: true,
-  });
+  const [editForm, setEditForm] = useState<ProductFormData>(emptyForm);
 
   const fetchProducts = async () => {
     const { data } = await supabase
       .from("products")
-      .select("id, name, slug, price, original_price, stock_quantity, is_active, category_id, categories(name)")
+      .select("id, name, slug, price, original_price, stock_quantity, is_active, is_new, category_id, categories(name)")
       .order("created_at", { ascending: false });
     setProducts((data as any) || []);
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const resetForm = () => {
-    setForm({ name: "", slug: "", price: "", original_price: "", stock_quantity: "", description: "", is_active: true });
-    setEditId(null);
-  };
-
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  useEffect(() => { fetchProducts(); }, []);
 
   const handleImageUpload = async (productId: string, file: File) => {
     const ext = file.name.split(".").pop();
     const path = `${productId}/${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage.from("product-images").upload(path, file);
-    if (uploadError) {
-      toast.error("Erro no upload: " + uploadError.message);
-      return;
-    }
+    if (uploadError) { toast.error("Erro no upload: " + uploadError.message); return; }
     const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
     const { error: dbError } = await supabase.from("product_images").insert({
-      product_id: productId,
-      url: urlData.publicUrl,
-      is_primary: true,
+      product_id: productId, url: urlData.publicUrl, is_primary: true,
     });
-    if (dbError) {
-      toast.error("Erro ao salvar imagem: " + dbError.message);
-    } else {
-      toast.success("Imagem enviada!");
-    }
-  };
-
-  const handleSave = async () => {
-    const slug = form.slug || generateSlug(form.name);
-    const payload = {
-      name: form.name,
-      slug,
-      price: parseFloat(form.price),
-      original_price: form.original_price ? parseFloat(form.original_price) : null,
-      stock_quantity: parseInt(form.stock_quantity) || 0,
-      description: form.description,
-      is_active: form.is_active,
-    };
-
-    let error;
-    let productId = editId;
-    if (editId) {
-      ({ error } = await supabase.from("products").update(payload).eq("id", editId));
-    } else {
-      const res = await supabase.from("products").insert(payload).select("id").single();
-      error = res.error;
-      productId = res.data?.id || null;
-    }
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(editId ? "Produto atualizado!" : "Produto criado!");
-      setDialogOpen(false);
-      resetForm();
-      fetchProducts();
-    }
+    if (dbError) toast.error("Erro ao salvar imagem: " + dbError.message);
+    else toast.success("Imagem enviada!");
   };
 
   const handleEdit = (p: Product) => {
-    setForm({
+    setEditForm({
       name: p.name,
       slug: p.slug,
       price: String(p.price),
@@ -129,19 +66,22 @@ const Products = () => {
       stock_quantity: String(p.stock_quantity),
       description: "",
       is_active: p.is_active,
+      is_new: p.is_new ?? false,
     });
     setEditId(p.id);
     setDialogOpen(true);
   };
 
+  const handleNew = () => {
+    setEditForm(emptyForm);
+    setEditId(null);
+    setDialogOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Produto excluído!");
-      fetchProducts();
-    }
+    if (error) toast.error(error.message);
+    else { toast.success("Produto excluído!"); fetchProducts(); }
   };
 
   const formatPrice = (v: number) =>
@@ -158,54 +98,16 @@ const Products = () => {
           <h1 className="text-2xl font-bold text-foreground">Produtos</h1>
           <p className="mt-1 text-sm text-muted-foreground">{products.length} produtos cadastrados</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-ocean text-primary-foreground hover:opacity-90">
-              <Plus className="mr-2 h-4 w-4" /> Novo Produto
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Nome</label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: generateSlug(e.target.value) })} />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Slug</label>
-                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Preço</label>
-                  <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Preço original</label>
-                  <Input type="number" step="0.01" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Estoque</label>
-                <Input type="number" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })} />
-              </div>
-              <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
-                {editId ? "Salvar Alterações" : "Criar Produto"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleNew} className="bg-gradient-ocean text-primary-foreground hover:opacity-90">
+          <Plus className="mr-2 h-4 w-4" /> Novo Produto
+        </Button>
       </div>
 
-      {/* Search */}
       <div className="relative mt-6 max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input className="pl-9" placeholder="Buscar produtos..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      {/* Table */}
       <div className="mt-4 rounded-lg border border-border">
         <Table>
           <TableHeader>
@@ -228,9 +130,16 @@ const Products = () => {
               filtered.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
-                    <div>
-                      <p className="font-medium text-foreground">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.categories?.name || "Sem categoria"}</p>
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <p className="font-medium text-foreground">{p.name}</p>
+                        <p className="text-xs text-muted-foreground">{p.categories?.name || "Sem categoria"}</p>
+                      </div>
+                      {p.is_new && (
+                        <span className="rounded-sm bg-[hsl(var(--badge-new))] px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                          NOVO
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-foreground">{formatPrice(p.price)}</TableCell>
@@ -248,15 +157,10 @@ const Products = () => {
                     <div className="flex gap-1">
                       <label className="cursor-pointer rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                         <ImageIcon size={14} />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleImageUpload(p.id, file);
-                          }}
-                        />
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(p.id, file);
+                        }} />
                       </label>
                       <button onClick={() => handleEdit(p)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                         <Pencil size={14} />
@@ -272,6 +176,14 @@ const Products = () => {
           </TableBody>
         </Table>
       </div>
+
+      <ProductFormDialog
+        open={dialogOpen}
+        onOpenChange={(v) => { setDialogOpen(v); if (!v) { setEditId(null); setEditForm(emptyForm); } }}
+        editId={editId}
+        initialForm={editForm}
+        onSaved={fetchProducts}
+      />
     </div>
   );
 };
