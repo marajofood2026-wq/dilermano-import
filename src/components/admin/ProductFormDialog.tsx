@@ -32,7 +32,14 @@ export interface ProductFormData {
   description: string;
   is_active: boolean;
   is_new: boolean;
+  category_id: string;
 }
+
+const MAIN_CATEGORIES = [
+  { id: "e8bdb08a-1506-4d9a-979a-6b213a4743c1", label: "Masculino" },
+  { id: "2da62689-f251-4591-986d-b6248f849272", label: "Feminino" },
+  { id: "39cc08db-787f-4448-880c-f41bf1cd9fb6", label: "Acessórios" },
+];
 
 export const emptyForm: ProductFormData = {
   name: "",
@@ -43,6 +50,7 @@ export const emptyForm: ProductFormData = {
   description: "",
   is_active: true,
   is_new: false,
+  category_id: "",
 };
 
 interface VariantRow {
