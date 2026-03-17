@@ -48,9 +48,9 @@ const CategoryPage = () => {
       if (slug === "novidades") {
         query = query.contains("tags", ["novo"]);
       } else if (slug === "promocoes") {
-        query = query.contains("tags", ["sale"]);
+        // Only products with original_price > price
+        query = query.not("original_price", "is", null);
       } else if (slug) {
-        // Filter by category slug
         const { data: cat } = await supabase.from("categories").select("id").eq("slug", slug).maybeSingle();
         if (cat) {
           query = query.eq("category_id", cat.id);
@@ -58,7 +58,14 @@ const CategoryPage = () => {
       }
 
       const { data } = await query.order("created_at", { ascending: false });
-      setProducts((data as any) || []);
+      let results = (data as any) || [];
+      
+      // For promoções, filter client-side to ensure original_price > price
+      if (slug === "promocoes") {
+        results = results.filter((p: Product) => p.original_price && p.original_price > p.price);
+      }
+      
+      setProducts(results);
       setLoading(false);
     };
     fetchProducts();
