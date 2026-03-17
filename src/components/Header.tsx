@@ -25,7 +25,7 @@ const Header = () => {
   const { totalItems } = useCart();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
         <button
           className="mr-3 text-foreground md:hidden"
