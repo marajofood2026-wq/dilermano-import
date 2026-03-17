@@ -276,6 +276,27 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
           </div>
 
+          {/* Gênero / Categoria principal */}
+          <div>
+            <Label className="mb-2 block">Gênero / Categoria principal *</Label>
+            <div className="flex flex-wrap gap-2">
+              {MAIN_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setForm({ ...form, category_id: cat.id })}
+                  className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                    form.category_id === cat.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
