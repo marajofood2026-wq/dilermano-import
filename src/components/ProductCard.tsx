@@ -32,7 +32,7 @@ const ProductCard = ({ image, name, price, originalPrice, badge, category }: Pro
         )}
         {badge === "sale" && (
           <span className="absolute left-3 top-3 rounded-sm bg-[hsl(var(--badge-sale))] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-destructive-foreground">
-            Sale
+            Promoção
           </span>
         )}
 
