@@ -5,8 +5,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Simulação de tabela de frete baseada em faixas de CEP
-// Em produção, substituir pela API real dos Correios
+const CEP_ORIGEM = "68480029";
+
+// Códigos de serviço dos Correios (público, sem contrato)
+const SERVICOS = {
+  SEDEX: "04014",
+  PAC: "04510",
+};
+
+// Dimensões e peso padrão (caso o produto não tenha)
+const DEFAULT_WEIGHT_KG = 0.5;
+const DEFAULT_LENGTH_CM = 20;
+const DEFAULT_WIDTH_CM = 15;
+const DEFAULT_HEIGHT_CM = 10;
+
+// Free shipping threshold
+const FREE_SHIPPING_THRESHOLD = 299;
+
+// Fallback: tabela simulada de frete por região
 const shippingZones: { cepStart: string; cepEnd: string; region: string; sedex: number; pac: number; days_sedex: number; days_pac: number }[] = [
   { cepStart: "01000", cepEnd: "19999", region: "SP Capital/Interior", sedex: 15.90, pac: 9.90, days_sedex: 2, days_pac: 5 },
   { cepStart: "20000", cepEnd: "28999", region: "RJ", sedex: 19.90, pac: 12.90, days_sedex: 3, days_pac: 7 },
@@ -38,6 +54,99 @@ const shippingZones: { cepStart: string; cepEnd: string; region: string; sedex: 
   { cepStart: "90000", cepEnd: "99999", region: "RS", sedex: 21.90, pac: 14.90, days_sedex: 3, days_pac: 8 },
 ];
 
+interface CorreiosResult {
+  Codigo: string;
+  Valor: string;
+  PrazoEntrega: string;
+  Erro: string;
+  MsgErro: string;
+}
+
+async function fetchCorreiosAPI(cepDestino: string): Promise<CorreiosResult[] | null> {
+  try {
+    const params = new URLSearchParams({
+      nCdEmpresa: "",
+      sDsSenha: "",
+      nCdServico: `${SERVICOS.SEDEX},${SERVICOS.PAC}`,
+      sCepOrigem: CEP_ORIGEM,
+      sCepDestino: cepDestino,
+      nVlPeso: String(DEFAULT_WEIGHT_KG),
+      nCdFormato: "1", // caixa/pacote
+      nVlComprimento: String(DEFAULT_LENGTH_CM),
+      nVlAltura: String(DEFAULT_HEIGHT_CM),
+      nVlLargura: String(DEFAULT_WIDTH_CM),
+      nVlDiametro: "0",
+      sCdMaoPropria: "N",
+      nVlValorDeclarado: "0",
+      sCdAvisoRecebimento: "N",
+      StrRetorno: "xml",
+      nIndicaCalculo: "3", // preço + prazo
+    });
+
+    const url = `http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${params.toString()}`;
+    console.log("Calling Correios API:", url);
+
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+
+    if (!response.ok) {
+      console.error("Correios API HTTP error:", response.status);
+      return null;
+    }
+
+    const xml = await response.text();
+    console.log("Correios API response:", xml.substring(0, 500));
+
+    // Parse XML response
+    const results: CorreiosResult[] = [];
+    const serviceRegex = /<cServico>([\s\S]*?)<\/cServico>/g;
+    let match;
+
+    while ((match = serviceRegex.exec(xml)) !== null) {
+      const block = match[1];
+      const getValue = (tag: string) => {
+        const m = block.match(new RegExp(`<${tag}>(.*?)<\/${tag}>`));
+        return m ? m[1] : "";
+      };
+
+      results.push({
+        Codigo: getValue("Codigo"),
+        Valor: getValue("Valor"),
+        PrazoEntrega: getValue("PrazoEntrega"),
+        Erro: getValue("Erro"),
+        MsgErro: getValue("MsgErro"),
+      });
+    }
+
+    if (results.length === 0) {
+      console.error("No results parsed from Correios XML");
+      return null;
+    }
+
+    // Check if all results have errors
+    const allErrors = results.every((r) => r.Erro && r.Erro !== "0");
+    if (allErrors) {
+      console.error("All Correios results have errors:", results.map((r) => r.MsgErro).join("; "));
+      return null;
+    }
+
+    return results;
+  } catch (err) {
+    console.error("Correios API error:", err);
+    return null;
+  }
+}
+
+function fallbackShipping(cleanCep: string) {
+  const cepNum = cleanCep.substring(0, 5);
+  return shippingZones.find((z) => cepNum >= z.cepStart && cepNum <= z.cepEnd) || null;
+}
+
+function getServiceName(codigo: string): string {
+  if (codigo === SERVICOS.SEDEX) return "SEDEX";
+  if (codigo === SERVICOS.PAC) return "PAC";
+  return `Correios (${codigo})`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -55,39 +164,75 @@ serve(async (req) => {
       throw new Error("CEP inválido");
     }
 
-    // Free shipping threshold
-    const FREE_SHIPPING_THRESHOLD = 299;
     const isFreeShipping = cartTotal && cartTotal >= FREE_SHIPPING_THRESHOLD;
 
-    // Find zone
-    const cepNum = cleanCep.substring(0, 5);
-    const zone = shippingZones.find(
-      (z) => cepNum >= z.cepStart && cepNum <= z.cepEnd
-    );
+    // Try real Correios API first
+    const correiosResults = await fetchCorreiosAPI(cleanCep);
 
-    if (!zone) {
-      throw new Error("CEP não encontrado na tabela de fretes");
+    let options: { service: string; price: number; original_price: number; days: number; free: boolean }[];
+    let region = "";
+    let source = "correios";
+
+    if (correiosResults && correiosResults.length > 0) {
+      // Use real Correios data
+      options = correiosResults
+        .filter((r) => !r.Erro || r.Erro === "0")
+        .map((r) => {
+          const price = parseFloat(r.Valor.replace(".", "").replace(",", "."));
+          return {
+            service: getServiceName(r.Codigo),
+            price: isFreeShipping ? 0 : price,
+            original_price: price,
+            days: parseInt(r.PrazoEntrega, 10) || 0,
+            free: isFreeShipping,
+          };
+        })
+        .sort((a, b) => a.days - b.days);
+
+      // Try to get region name from ViaCEP
+      try {
+        const viacepRes = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`, { signal: AbortSignal.timeout(3000) });
+        if (viacepRes.ok) {
+          const viacepData = await viacepRes.json();
+          if (!viacepData.erro) {
+            region = `${viacepData.localidade}/${viacepData.uf}`;
+          }
+        }
+      } catch {
+        // Region info is optional
+      }
+    } else {
+      // Fallback to simulated table
+      source = "simulado";
+      const zone = fallbackShipping(cleanCep);
+      if (!zone) {
+        throw new Error("CEP não encontrado. Verifique o CEP informado.");
+      }
+      region = zone.region;
+      options = [
+        {
+          service: "SEDEX",
+          price: isFreeShipping ? 0 : zone.sedex,
+          original_price: zone.sedex,
+          days: zone.days_sedex,
+          free: isFreeShipping,
+        },
+        {
+          service: "PAC",
+          price: isFreeShipping ? 0 : zone.pac,
+          original_price: zone.pac,
+          days: zone.days_pac,
+          free: isFreeShipping,
+        },
+      ];
     }
 
-    const options = [
-      {
-        service: "SEDEX",
-        price: isFreeShipping ? 0 : zone.sedex,
-        original_price: zone.sedex,
-        days: zone.days_sedex,
-        free: isFreeShipping,
-      },
-      {
-        service: "PAC",
-        price: isFreeShipping ? 0 : zone.pac,
-        original_price: zone.pac,
-        days: zone.days_pac,
-        free: isFreeShipping,
-      },
-    ];
+    if (options.length === 0) {
+      throw new Error("Nenhuma opção de frete disponível para este CEP.");
+    }
 
     return new Response(
-      JSON.stringify({ options, region: zone.region }),
+      JSON.stringify({ options, region, source }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
