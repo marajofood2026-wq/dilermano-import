@@ -93,18 +93,18 @@ const Index = () => {
             <span className="mb-4 inline-block rounded-sm bg-gradient-ocean px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary-foreground">
               Nova Coleção 2026
             </span>
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
               Estilo que vem<br />
               <span className="text-gradient-ocean">do oceano</span>
             </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
               Peças importadas com qualidade premium. Surf, street e lifestyle em um só lugar.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/novidades" className="inline-flex items-center gap-2 rounded-md bg-gradient-ocean px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
                 Explorar Coleção <ArrowRight size={16} />
               </Link>
-              <Link to="/promocoes" className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-muted">
+              <Link to="/promocoes" className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
                 Ver Promoções
               </Link>
             </div>

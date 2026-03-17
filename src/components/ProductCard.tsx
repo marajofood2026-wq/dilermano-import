@@ -14,7 +14,7 @@ const ProductCard = ({ image, name, price, originalPrice, badge, category }: Pro
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-card transition-all duration-300 hover:shadow-card-hover">
+    <div className="group relative overflow-hidden rounded-lg border border-border bg-card transition-all duration-300 hover:shadow-card-hover">
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden">
         <img
