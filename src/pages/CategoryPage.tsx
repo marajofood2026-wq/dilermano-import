@@ -46,7 +46,7 @@ const CategoryPage = () => {
         .eq("is_active", true);
 
       if (slug === "novidades") {
-        query = query.contains("tags", ["novo"]);
+        query = query.eq("is_new", true);
       } else if (slug === "promocoes") {
         // Only products with original_price > price
         query = query.not("original_price", "is", null);

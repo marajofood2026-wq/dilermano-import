@@ -32,7 +32,14 @@ export interface ProductFormData {
   description: string;
   is_active: boolean;
   is_new: boolean;
+  category_id: string;
 }
+
+const MAIN_CATEGORIES = [
+  { id: "e8bdb08a-1506-4d9a-979a-6b213a4743c1", label: "Masculino" },
+  { id: "2da62689-f251-4591-986d-b6248f849272", label: "Feminino" },
+  { id: "39cc08db-787f-4448-880c-f41bf1cd9fb6", label: "Acessórios" },
+];
 
 export const emptyForm: ProductFormData = {
   name: "",
@@ -43,6 +50,7 @@ export const emptyForm: ProductFormData = {
   description: "",
   is_active: true,
   is_new: false,
+  category_id: "",
 };
 
 interface VariantRow {
@@ -173,6 +181,10 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
 
   const handleSave = async () => {
     const slug = form.slug || generateSlug(form.name);
+    if (!form.category_id) {
+      toast.error("Selecione o Gênero / Categoria principal.");
+      return;
+    }
     const payload = {
       name: form.name,
       slug,
@@ -182,6 +194,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       description: form.description || null,
       is_active: form.is_active,
       is_new: form.is_new,
+      category_id: form.category_id,
     };
 
     let error;
@@ -261,6 +274,27 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
           <div>
             <Label>Descrição</Label>
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
+          </div>
+
+          {/* Gênero / Categoria principal */}
+          <div>
+            <Label className="mb-2 block">Gênero / Categoria principal *</Label>
+            <div className="flex flex-wrap gap-2">
+              {MAIN_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setForm({ ...form, category_id: cat.id })}
+                  className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                    form.category_id === cat.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-6">
