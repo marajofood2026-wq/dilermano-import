@@ -181,6 +181,10 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
 
   const handleSave = async () => {
     const slug = form.slug || generateSlug(form.name);
+    if (!form.category_id) {
+      toast.error("Selecione o Gênero / Categoria principal.");
+      return;
+    }
     const payload = {
       name: form.name,
       slug,
@@ -190,6 +194,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       description: form.description || null,
       is_active: form.is_active,
       is_new: form.is_new,
+      category_id: form.category_id,
     };
 
     let error;
