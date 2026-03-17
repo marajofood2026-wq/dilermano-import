@@ -70,8 +70,8 @@ const CategoryPage = () => {
   };
 
   const getBadge = (p: Product): "novo" | "sale" | undefined => {
+    if (p.original_price && p.original_price > p.price) return "sale";
     if (p.tags?.includes("novo")) return "novo";
-    if (p.tags?.includes("sale") || p.original_price) return "sale";
     return undefined;
   };
 
