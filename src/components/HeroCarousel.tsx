@@ -13,13 +13,17 @@ interface Banner {
   sort_order: number;
 }
 
-const HeroCarousel = () => {
+interface HeroCarouselProps {
+  fallback: React.ReactNode;
+}
+
+const HeroCarousel = ({ fallback }: HeroCarouselProps) => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchBanners = async () => {
       const { data } = await supabase
         .from("banners")
         .select("id, title, subtitle, image_url, link_url, sort_order")
@@ -30,7 +34,7 @@ const HeroCarousel = () => {
       setBanners(data || []);
       setLoading(false);
     };
-    fetch();
+    fetchBanners();
   }, []);
 
   // Autoplay
@@ -50,10 +54,14 @@ const HeroCarousel = () => {
     setCurrent((c) => (c + 1) % banners.length);
   }, [banners.length]);
 
-  if (loading || banners.length === 0) return null;
+  // Loading: render nothing to avoid layout jump
+  if (loading) return null;
+
+  // No banners: show original hero
+  if (banners.length === 0) return <>{fallback}</>;
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ minHeight: "60vh" }}>
+    <section className="relative w-full overflow-hidden pt-16" style={{ minHeight: "85vh" }}>
       {banners.map((banner, i) => {
         const Wrapper = banner.link_url ? Link : "div";
         const wrapperProps = banner.link_url ? { to: banner.link_url } : {};
@@ -70,10 +78,10 @@ const HeroCarousel = () => {
               src={banner.image_url}
               alt={banner.title}
               className="h-full w-full object-cover"
-              style={{ minHeight: "60vh" }}
+              style={{ minHeight: "85vh" }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute bottom-12 left-0 right-0 container z-20">
+            <div className="absolute bottom-16 left-0 right-0 container z-20">
               <h2 className="text-2xl font-extrabold text-white sm:text-4xl lg:text-5xl drop-shadow-lg">
                 {banner.title}
               </h2>

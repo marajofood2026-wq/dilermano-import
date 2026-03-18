@@ -85,36 +85,37 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Banner Carousel */}
-      <HeroCarousel />
-
-      {/* Hero */}
-      <section className="relative flex min-h-[85vh] items-center pt-16">
-        <img src={heroBg} alt="Hero" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="bg-hero-overlay absolute inset-0" />
-        <div className="container relative z-10">
-          <div className="max-w-xl animate-fade-in">
-            <span className="mb-4 inline-block rounded-sm bg-gradient-ocean px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary-foreground">
-              Nova Coleção 2026
-            </span>
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Estilo que vem<br />
-              <span className="text-gradient-ocean">do oceano</span>
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
-              Peças importadas com qualidade premium. Surf, street e lifestyle em um só lugar.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/novidades" className="inline-flex items-center gap-2 rounded-md bg-gradient-ocean px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
-                Explorar Coleção <ArrowRight size={16} />
-              </Link>
-              <Link to="/promocoes" className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
-                Ver Promoções
-              </Link>
+      {/* Hero: Carousel if banners exist, otherwise static hero */}
+      <HeroCarousel
+        fallback={
+          <section className="relative flex min-h-[85vh] items-center pt-16">
+            <img src={heroBg} alt="Hero" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="bg-hero-overlay absolute inset-0" />
+            <div className="container relative z-10">
+              <div className="max-w-xl animate-fade-in">
+                <span className="mb-4 inline-block rounded-sm bg-gradient-ocean px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary-foreground">
+                  Nova Coleção 2026
+                </span>
+                <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  Estilo que vem<br />
+                  <span className="text-gradient-ocean">do oceano</span>
+                </h1>
+                <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
+                  Peças importadas com qualidade premium. Surf, street e lifestyle em um só lugar.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link to="/novidades" className="inline-flex items-center gap-2 rounded-md bg-gradient-ocean px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+                    Explorar Coleção <ArrowRight size={16} />
+                  </Link>
+                  <Link to="/promocoes" className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
+                    Ver Promoções
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        }
+      />
 
       {/* Categories */}
       <section className="container py-16">
