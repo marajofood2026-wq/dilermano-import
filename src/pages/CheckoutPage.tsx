@@ -58,7 +58,8 @@ const CheckoutPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [step, setStep] = useState<"address" | "payment">("address");
 
-  const freeShippingThreshold = 299;
+  const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
+  const { isFree: hasFreeShipping } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
   useEffect(() => {
     if (items.length === 0) navigate("/carrinho", { replace: true });

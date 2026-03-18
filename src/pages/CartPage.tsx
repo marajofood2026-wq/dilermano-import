@@ -239,7 +239,7 @@ const CartPage = () => {
                       ) : (
                         formatPrice(selectedShipping.price)
                       )
-                    ) : totalPrice >= freeShippingThreshold ? (
+                    ) : hasFreeShipping ? (
                       <span className="text-[hsl(var(--badge-new))]">Grátis</span>
                     ) : (
                       "A calcular"
