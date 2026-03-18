@@ -184,21 +184,46 @@ const Index = () => {
 
       {/* Banner CTA */}
       <section className="container pb-16">
-        <div className="relative overflow-hidden rounded-lg bg-gradient-ocean p-8 sm:p-12">
-          <div className="relative z-10 max-w-md">
-            <h2 className="text-2xl font-extrabold tracking-tight text-primary-foreground sm:text-3xl">
-              Frete grátis acima de R$ 299
-            </h2>
-            <p className="mt-2 text-sm text-primary-foreground/80">
-              Aproveite condições especiais em toda a loja. Parcele em até 10x sem juros.
-            </p>
-            <Link to="/novidades" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-opacity hover:opacity-90">
-              Comprar Agora <ArrowRight size={16} />
-            </Link>
+        {promoBanner?.is_active ? (
+          <div className="relative overflow-hidden rounded-lg bg-gradient-ocean p-8 sm:p-12">
+            <div className="relative z-10 max-w-md">
+              <h2 className="text-2xl font-extrabold tracking-tight text-primary-foreground sm:text-3xl">
+                {promoBanner.title}
+              </h2>
+              {promoBanner.subtitle && (
+                <p className="mt-2 text-sm text-primary-foreground/80">
+                  {promoBanner.subtitle}
+                </p>
+              )}
+              {promoBanner.button_text && (
+                <Link to={promoBanner.button_link || "/novidades"} className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-opacity hover:opacity-90">
+                  {promoBanner.button_text} <ArrowRight size={16} />
+                </Link>
+              )}
+            </div>
+            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-primary-foreground/10 sm:h-56 sm:w-56" />
+            <div className="absolute -bottom-12 right-16 h-32 w-32 rounded-full bg-primary-foreground/5 sm:h-40 sm:w-40" />
           </div>
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-primary-foreground/10 sm:h-56 sm:w-56" />
-          <div className="absolute -bottom-12 right-16 h-32 w-32 rounded-full bg-primary-foreground/5 sm:h-40 sm:w-40" />
-        </div>
+        ) : (
+          <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-muted to-accent p-8 sm:p-12">
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <span className="text-3xl">🛍️</span>
+              </div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                Descubra nosso estilo
+              </h2>
+              <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                Explore peças exclusivas com qualidade premium. Surf, street e lifestyle em um só lugar.
+              </p>
+              <Link to="/novidades" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+                Explorar Coleção <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-primary/5 sm:h-56 sm:w-56" />
+            <div className="absolute -bottom-12 right-16 h-32 w-32 rounded-full bg-primary/5 sm:h-40 sm:w-40" />
+          </div>
+        )}
       </section>
 
       <Footer />
