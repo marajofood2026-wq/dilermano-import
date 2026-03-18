@@ -85,6 +85,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
+      {/* Banner Carousel */}
+      <HeroCarousel />
+
       {/* Hero */}
       <section className="relative flex min-h-[85vh] items-center pt-16">
         <img src={heroBg} alt="Hero" className="absolute inset-0 h-full w-full object-cover" />
