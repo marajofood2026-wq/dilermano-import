@@ -34,7 +34,14 @@ const fallbackImages: Record<string, string> = {
   "vestido-floral-resort": prodDress,
 };
 
-const categories = [
+// Fallback images by slug for categories without uploaded images
+const categoryFallbackImages: Record<string, string> = {
+  masculino: catMens,
+  feminino: catWomens,
+  acessorios: catAccessories,
+};
+
+const defaultCategories = [
   { image: catMens, title: "Masculino", href: "/masculino" },
   { image: catWomens, title: "Feminino", href: "/feminino" },
   { image: catAccessories, title: "Acessórios", href: "/acessorios" },
@@ -53,6 +60,14 @@ interface Product {
   product_images: { url: string; is_primary: boolean }[];
 }
 
+interface CategoryRow {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  sort_order: number | null;
+}
+
 interface PromoBanner {
   id: string;
   title: string;
@@ -66,6 +81,7 @@ interface PromoBanner {
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [promoBanner, setPromoBanner] = useState<PromoBanner | null>(null);
+  const [dbCategories, setDbCategories] = useState<CategoryRow[]>([]);
 
   useEffect(() => {
     const fetchPromoBanner = async () => {
@@ -77,6 +93,18 @@ const Index = () => {
       setPromoBanner(data as any);
     };
     fetchPromoBanner();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name, slug, image_url, sort_order")
+        .eq("is_active", true)
+        .order("sort_order");
+      setDbCategories((data as CategoryRow[]) || []);
+    };
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -103,6 +131,15 @@ const Index = () => {
     if (p.is_new || p.tags?.includes("novo")) return "novo";
     return undefined;
   };
+
+  // Build category list: use DB if available, otherwise fallback
+  const categoryCards = dbCategories.length > 0
+    ? dbCategories.map((c) => ({
+        image: c.image_url || categoryFallbackImages[c.slug] || "/placeholder.svg",
+        title: c.name,
+        href: `/${c.slug}`,
+      }))
+    : defaultCategories;
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,7 +186,7 @@ const Index = () => {
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          {categories.map((cat) => (
+          {categoryCards.map((cat) => (
             <CategoryCard key={cat.title} {...cat} />
           ))}
         </div>
