@@ -153,11 +153,11 @@ const Banners = () => {
               <Plus className="mr-2 h-4 w-4" /> Novo Banner
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0">
-            <DialogHeader className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
+          <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+            <div className="shrink-0 border-b border-border px-6 pt-6 pb-4 pr-12">
               <DialogTitle>{editId ? "Editar" : "Novo"} Banner</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 px-6 py-4 overflow-y-auto flex-1">
+            </div>
+            <div className="space-y-4 px-6 py-4 overflow-y-auto flex-1 min-h-0">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Título *</label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -245,7 +245,7 @@ const Banners = () => {
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               </div>
             </div>
-            <div className="sticky bottom-0 z-10 bg-background border-t border-border px-6 py-4">
+            <div className="shrink-0 border-t border-border px-6 py-4 bg-background">
               <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">Salvar</Button>
             </div>
           </DialogContent>
