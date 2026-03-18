@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Pencil, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogTitle, DialogTrigger, DialogClose,
 } from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -137,12 +137,14 @@ const Categories = () => {
               <Plus className="mr-2 h-4 w-4" /> Nova Categoria
             </Button>
           </DialogTrigger>
-          <DialogContent className="flex max-h-[90vh] max-w-sm flex-col p-0">
+          <DialogContent className="flex max-h-[90vh] max-w-sm flex-col gap-0 overflow-hidden p-0 [&>button:last-child]:hidden">
             {/* HEADER */}
-            <div className="sticky top-0 z-10 border-b border-border bg-background px-6 py-4">
-              <DialogHeader>
-                <DialogTitle>{editId ? "Editar" : "Nova"} Categoria</DialogTitle>
-              </DialogHeader>
+            <div className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
+              <DialogTitle>{editId ? "Editar" : "Nova"} Categoria</DialogTitle>
+              <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Fechar</span>
+              </DialogClose>
             </div>
 
             {/* BODY */}
@@ -197,7 +199,7 @@ const Categories = () => {
             </div>
 
             {/* FOOTER */}
-            <div className="sticky bottom-0 border-t border-border bg-background px-6 py-4">
+            <div className="border-t border-border bg-background px-6 py-4">
               <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
                 {saving ? "Salvando..." : "Salvar"}
               </Button>
