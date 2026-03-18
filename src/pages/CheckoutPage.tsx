@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useFreeShippingThreshold, getFreeShippingStatus } from "@/hooks/useFreeShippingThreshold";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,7 +58,8 @@ const CheckoutPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [step, setStep] = useState<"address" | "payment">("address");
 
-  const freeShippingThreshold = 299;
+  const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
+  const { isFree: hasFreeShipping } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
   useEffect(() => {
     if (items.length === 0) navigate("/carrinho", { replace: true });

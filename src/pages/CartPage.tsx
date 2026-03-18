@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck } from "lucide-react";
 import { toast } from "sonner";
+import { useFreeShippingThreshold, getFreeShippingStatus } from "@/hooks/useFreeShippingThreshold";
 
 interface ShippingOption {
   service: string;
@@ -27,6 +28,8 @@ const CartPage = () => {
   const { user } = useAuth();
 
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
+  const { isFree: hasFreeShipping, remaining: remainingForFreeShipping, progress: freeShippingProgress } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -41,9 +44,6 @@ const CartPage = () => {
     }
     navigate("/checkout");
   };
-
-  const freeShippingThreshold = 299;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - totalPrice);
 
   const handleCalculateShipping = async () => {
     if (!cep || cep.replace(/\D/g, "").length !== 8) {
@@ -103,7 +103,7 @@ const CartPage = () => {
         <p className="mt-1 text-sm text-muted-foreground">{totalItems} {totalItems === 1 ? "item" : "itens"}</p>
 
         {/* Free shipping bar */}
-        {remainingForFreeShipping > 0 && (
+        {freeShippingThreshold !== null && !hasFreeShipping && (
           <div className="mt-4 rounded-lg bg-card p-3">
             <p className="text-sm text-muted-foreground">
               Falta <span className="font-semibold text-primary">{formatPrice(remainingForFreeShipping)}</span> para frete grátis!
@@ -111,7 +111,7 @@ const CartPage = () => {
             <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-gradient-ocean transition-all"
-                style={{ width: `${Math.min(100, (totalPrice / freeShippingThreshold) * 100)}%` }}
+                style={{ width: `${freeShippingProgress}%` }}
               />
             </div>
           </div>
@@ -239,7 +239,7 @@ const CartPage = () => {
                       ) : (
                         formatPrice(selectedShipping.price)
                       )
-                    ) : totalPrice >= freeShippingThreshold ? (
+                    ) : hasFreeShipping ? (
                       <span className="text-[hsl(var(--badge-new))]">Grátis</span>
                     ) : (
                       "A calcular"
