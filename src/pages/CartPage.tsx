@@ -103,7 +103,7 @@ const CartPage = () => {
         <p className="mt-1 text-sm text-muted-foreground">{totalItems} {totalItems === 1 ? "item" : "itens"}</p>
 
         {/* Free shipping bar */}
-        {remainingForFreeShipping > 0 && (
+        {freeShippingThreshold !== null && !hasFreeShipping && (
           <div className="mt-4 rounded-lg bg-card p-3">
             <p className="text-sm text-muted-foreground">
               Falta <span className="font-semibold text-primary">{formatPrice(remainingForFreeShipping)}</span> para frete grátis!
@@ -111,7 +111,7 @@ const CartPage = () => {
             <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-gradient-ocean transition-all"
-                style={{ width: `${Math.min(100, (totalPrice / freeShippingThreshold) * 100)}%` }}
+                style={{ width: `${freeShippingProgress}%` }}
               />
             </div>
           </div>
