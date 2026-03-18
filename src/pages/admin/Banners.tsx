@@ -244,6 +244,8 @@ const Banners = () => {
                 <label className="text-sm font-medium text-foreground">Ativo</label>
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               </div>
+            </div>
+            <div className="sticky bottom-0 z-10 bg-background border-t border-border px-6 py-4">
               <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">Salvar</Button>
             </div>
           </DialogContent>
