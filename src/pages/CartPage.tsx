@@ -28,6 +28,8 @@ const CartPage = () => {
   const { user } = useAuth();
 
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
+  const { isFree: hasFreeShipping, remaining: remainingForFreeShipping, progress: freeShippingProgress } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -42,9 +44,6 @@ const CartPage = () => {
     }
     navigate("/checkout");
   };
-
-  const freeShippingThreshold = 299;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - totalPrice);
 
   const handleCalculateShipping = async () => {
     if (!cep || cep.replace(/\D/g, "").length !== 8) {
