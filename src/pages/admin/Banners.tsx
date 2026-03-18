@@ -153,11 +153,11 @@ const Banners = () => {
               <Plus className="mr-2 h-4 w-4" /> Novo Banner
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
+          <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0">
+            <DialogHeader className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
               <DialogTitle>{editId ? "Editar" : "Novo"} Banner</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <div className="space-y-4 px-6 py-4 overflow-y-auto flex-1">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Título *</label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -244,6 +244,8 @@ const Banners = () => {
                 <label className="text-sm font-medium text-foreground">Ativo</label>
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               </div>
+            </div>
+            <div className="sticky bottom-0 z-10 bg-background border-t border-border px-6 py-4">
               <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">Salvar</Button>
             </div>
           </DialogContent>
