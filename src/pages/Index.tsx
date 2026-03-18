@@ -53,8 +53,31 @@ interface Product {
   product_images: { url: string; is_primary: boolean }[];
 }
 
+interface PromoBanner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  button_text: string | null;
+  button_link: string | null;
+  value: number | null;
+  is_active: boolean;
+}
+
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [promoBanner, setPromoBanner] = useState<PromoBanner | null>(null);
+
+  useEffect(() => {
+    const fetchPromoBanner = async () => {
+      const { data } = await supabase
+        .from("promo_banner")
+        .select("*")
+        .limit(1)
+        .single();
+      setPromoBanner(data as any);
+    };
+    fetchPromoBanner();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
