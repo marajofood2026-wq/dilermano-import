@@ -609,6 +609,42 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_banner: {
+        Row: {
+          button_link: string | null
+          button_text: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
