@@ -90,9 +90,10 @@ const Products = () => {
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+    const q = search.toLowerCase();
+    return p.name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q));
+  });
 
   return (
     <div>
