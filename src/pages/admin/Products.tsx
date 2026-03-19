@@ -97,7 +97,7 @@ const Products = () => {
 
       <div className="relative mt-6 max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" placeholder="Buscar produtos..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input className="pl-9" placeholder="Buscar por nome ou código..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="mt-4 rounded-lg border border-border">
