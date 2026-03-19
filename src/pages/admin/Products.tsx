@@ -147,13 +147,6 @@ const Products = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <label className="cursor-pointer rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
-                        <ImageIcon size={14} />
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleImageUpload(p.id, file);
-                        }} />
-                      </label>
                       <button onClick={() => handleEdit(p)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                         <Pencil size={14} />
                       </button>
