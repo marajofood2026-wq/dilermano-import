@@ -563,26 +563,206 @@ const CheckoutPage = () => {
                   )}
                 </div>
 
-                {/* Payment */}
+                {/* Payment Methods */}
                 <div className="rounded-lg border border-border bg-card p-6">
                   <div className="flex items-center gap-2 text-foreground">
                     <CreditCard size={18} />
-                    <h2 className="font-bold">Pagamento</h2>
+                    <h2 className="font-bold">Forma de Pagamento</h2>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Você será redirecionado para a página segura de pagamento via Stripe.
-                  </p>
-                  <Button
-                    onClick={handleCheckout}
-                    disabled={checkoutLoading}
-                    className="mt-4 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
-                  >
-                    {checkoutLoading ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
-                    ) : (
-                      <>Pagar {formatPrice(orderTotal)} <ArrowRight className="ml-2 h-4 w-4" /></>
-                    )}
-                  </Button>
+
+                  <div className="mt-4 space-y-3">
+                    {/* Stripe */}
+                    <button
+                      onClick={() => setPaymentMethod("stripe")}
+                      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
+                        paymentMethod === "stripe" ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                      }`}
+                    >
+                      <CreditCard size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-foreground">Cartão de Crédito/Débito</p>
+                        <p className="text-xs text-muted-foreground">Pagamento seguro via Stripe</p>
+                      </div>
+                    </button>
+
+                    {/* Pix */}
+                    <button
+                      onClick={() => setPaymentMethod("pix")}
+                      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
+                        paymentMethod === "pix" ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                      }`}
+                    >
+                      <QrCode size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-foreground">Pix</p>
+                        <p className="text-xs text-muted-foreground">Pagamento instantâneo via QR Code</p>
+                      </div>
+                    </button>
+
+                    {/* WhatsApp */}
+                    <button
+                      onClick={() => setPaymentMethod("whatsapp")}
+                      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
+                        paymentMethod === "whatsapp" ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                      }`}
+                    >
+                      <MessageCircle size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-foreground">Negociar entrega com o vendedor</p>
+                        <p className="text-xs text-muted-foreground">Fale direto pelo WhatsApp</p>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Stripe payment */}
+                  {paymentMethod === "stripe" && (
+                    <div className="mt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Você será redirecionado para a página segura de pagamento via Stripe.
+                      </p>
+                      <Button
+                        onClick={handleCheckout}
+                        disabled={checkoutLoading}
+                        className="mt-4 w-full bg-gradient-ocean text-primary-foreground hover:opacity-90"
+                      >
+                        {checkoutLoading ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processando...</>
+                        ) : (
+                          <>Pagar {formatPrice(orderTotal)} <ArrowRight className="ml-2 h-4 w-4" /></>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Pix payment */}
+                  {paymentMethod === "pix" && (
+                    <div className="mt-4 space-y-4">
+                      <div className="flex flex-col items-center rounded-lg border border-border bg-background p-4">
+                        <img
+                          src="https://i.postimg.cc/P5xftMhZ/QR2-Code-Pix-91983997964.jpg"
+                          alt="QR Code Pix"
+                          className="h-48 w-48 rounded"
+                        />
+                        <div className="mt-3 text-center text-sm">
+                          <p className="font-medium text-foreground">Chave Pix: 91983997964</p>
+                          <p className="text-muted-foreground">Nome: Loja Dilermano</p>
+                          <p className="mt-1 text-xs text-muted-foreground">Valor: {formatPrice(orderTotal)}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="mb-2 block text-sm font-medium">Enviar Comprovante de Pagamento</Label>
+                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-4 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
+                          <Upload size={16} />
+                          {pixProof ? pixProof.name : "Selecionar imagem (PNG ou JPG)"}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) setPixProof(file);
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      <Button
+                        disabled={!pixProof || pixProofUploading}
+                        onClick={async () => {
+                          if (!pixProof || !user) return;
+                          setPixProofUploading(true);
+                          try {
+                            // Save order first
+                            const { data: order, error: orderError } = await supabase
+                              .from("orders")
+                              .insert({
+                                user_id: user.id,
+                                order_number: "TEMP",
+                                subtotal: totalPrice,
+                                total: orderTotal,
+                                shipping_cost: shippingCost,
+                                shipping_carrier: selectedShipping?.service || null,
+                                shipping_address: address as any,
+                                discount_amount: discountAmount > 0 ? discountAmount : null,
+                                coupon_id: appliedCoupon?.id || null,
+                                payment_method: "pix",
+                                status: "pending",
+                                payment_status: "pending",
+                              })
+                              .select("id, order_number")
+                              .single();
+                            if (orderError) throw orderError;
+
+                            const orderItems = items.map((i) => ({
+                              order_id: order.id,
+                              product_id: i.productId,
+                              variant_id: i.variantId || null,
+                              product_name: i.name,
+                              variant_name: i.variantName || null,
+                              quantity: i.quantity,
+                              unit_price: i.price,
+                              total_price: i.price * i.quantity,
+                            }));
+                            await supabase.from("order_items").insert(orderItems);
+
+                            // Upload proof
+                            const ext = pixProof.name.split(".").pop();
+                            const path = `pix-proofs/${order.id}.${ext}`;
+                            await supabase.storage.from("product-images").upload(path, pixProof);
+
+                            // Build WhatsApp message
+                            const itemsList = items.map((i) => `• ${i.name} x${i.quantity} - ${formatPrice(i.price * i.quantity)}`).join("%0A");
+                            const msg = `Olá! Fiz um pedido na loja.%0A%0A` +
+                              `📦 *Pedido:* ${order.order_number}%0A` +
+                              `👤 *Cliente:* ${user.email}%0A%0A` +
+                              `*Itens:*%0A${itemsList}%0A%0A` +
+                              `💰 *Total:* ${formatPrice(orderTotal)}%0A` +
+                              `✅ *Comprovante Pix enviado!*`;
+
+                            clearCart();
+                            window.open(`https://wa.me/5591983997964?text=${msg}`, "_blank");
+                            navigate("/checkout/success?order=" + order.id);
+                          } catch (err: any) {
+                            toast.error("Erro: " + (err.message || "Tente novamente"));
+                          } finally {
+                            setPixProofUploading(false);
+                          }
+                        }}
+                        className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                      >
+                        {pixProofUploading ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</>
+                        ) : (
+                          <>Enviar Comprovante de Pagamento <ArrowRight className="ml-2 h-4 w-4" /></>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* WhatsApp negotiation */}
+                  {paymentMethod === "whatsapp" && (
+                    <div className="mt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Negocie a entrega e forma de pagamento diretamente com o vendedor pelo WhatsApp.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          const itemsList = items.map((i) => `• ${i.name} x${i.quantity} - ${formatPrice(i.price * i.quantity)}`).join("%0A");
+                          const addr = `${address.street}, ${address.number}${address.complement ? " - " + address.complement : ""}, ${address.neighborhood}, ${address.city}/${address.state} - CEP ${address.zip_code}`;
+                          const msg = `Olá! Gostaria de negociar a entrega do meu pedido.%0A%0A` +
+                            `*Itens:*%0A${itemsList}%0A%0A` +
+                            `💰 *Total:* ${formatPrice(orderTotal)}%0A` +
+                            `📍 *Endereço:* ${addr}`;
+                          window.open(`https://wa.me/5591983997964?text=${msg}`, "_blank");
+                        }}
+                        className="mt-4 w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                      >
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Abrir WhatsApp
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
