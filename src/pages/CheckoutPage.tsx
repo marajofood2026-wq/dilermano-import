@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFreeShippingThreshold, getFreeShippingStatus } from "@/hooks/useFreeShippingThreshold";
+import { useMaxInstallments } from "@/hooks/useMaxInstallments";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Loader2, ArrowRight, Truck, Tag, ShoppingBag, ArrowLeft, CreditCard, MapPin,
+  Loader2, ArrowRight, Truck, Tag, ShoppingBag, ArrowLeft, CreditCard, MapPin, MessageCircle, QrCode, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
