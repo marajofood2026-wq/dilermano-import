@@ -45,18 +45,6 @@ const Products = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const handleImageUpload = async (productId: string, file: File) => {
-    const ext = file.name.split(".").pop();
-    const path = `${productId}/${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("product-images").upload(path, file);
-    if (uploadError) { toast.error("Erro no upload: " + uploadError.message); return; }
-    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
-    const { error: dbError } = await supabase.from("product_images").insert({
-      product_id: productId, url: urlData.publicUrl, is_primary: true,
-    });
-    if (dbError) toast.error("Erro ao salvar imagem: " + dbError.message);
-    else toast.success("Imagem enviada!");
-  };
 
   const handleEdit = (p: Product) => {
     setEditForm({
