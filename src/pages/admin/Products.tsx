@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -24,6 +24,7 @@ interface Product {
   is_active: boolean;
   is_new: boolean;
   category_id: string | null;
+  sku: string | null;
   categories?: { name: string } | null;
 }
 
@@ -37,25 +38,13 @@ const Products = () => {
   const fetchProducts = async () => {
     const { data } = await supabase
       .from("products")
-      .select("id, name, slug, price, original_price, stock_quantity, is_active, is_new, category_id, categories(name)")
+      .select("id, name, slug, price, original_price, stock_quantity, is_active, is_new, category_id, sku, categories(name)")
       .order("created_at", { ascending: false });
     setProducts((data as any) || []);
   };
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const handleImageUpload = async (productId: string, file: File) => {
-    const ext = file.name.split(".").pop();
-    const path = `${productId}/${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("product-images").upload(path, file);
-    if (uploadError) { toast.error("Erro no upload: " + uploadError.message); return; }
-    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
-    const { error: dbError } = await supabase.from("product_images").insert({
-      product_id: productId, url: urlData.publicUrl, is_primary: true,
-    });
-    if (dbError) toast.error("Erro ao salvar imagem: " + dbError.message);
-    else toast.success("Imagem enviada!");
-  };
 
   const handleEdit = (p: Product) => {
     setEditForm({
@@ -68,6 +57,7 @@ const Products = () => {
       is_active: p.is_active,
       is_new: p.is_new ?? false,
       category_id: p.category_id || "",
+      sku: p.sku || "",
     });
     setEditId(p.id);
     setDialogOpen(true);
@@ -88,9 +78,10 @@ const Products = () => {
   const formatPrice = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+    const q = search.toLowerCase();
+    return p.name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q));
+  });
 
   return (
     <div>
@@ -106,7 +97,7 @@ const Products = () => {
 
       <div className="relative mt-6 max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" placeholder="Buscar produtos..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input className="pl-9" placeholder="Buscar por nome ou código..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="mt-4 rounded-lg border border-border">
@@ -156,13 +147,6 @@ const Products = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <label className="cursor-pointer rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
-                        <ImageIcon size={14} />
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleImageUpload(p.id, file);
-                        }} />
-                      </label>
                       <button onClick={() => handleEdit(p)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                         <Pencil size={14} />
                       </button>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
+import { useMaxInstallments } from "@/hooks/useMaxInstallments";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ const COLORS_MAP: Record<string, string> = {
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const maxInstallments = useMaxInstallments();
   const { addItem } = useCart();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -198,7 +200,7 @@ const ProductPage = () => {
             </div>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              ou 10x de {formatPrice(effectivePrice / 10)} sem juros
+              ou {maxInstallments}x de {formatPrice(effectivePrice / maxInstallments)} sem juros
             </p>
 
             {product.description && (
@@ -282,16 +284,12 @@ const ProductPage = () => {
               {effectiveStock > 0 ? `${effectiveStock} unidades em estoque` : "Produto esgotado"}
             </p>
 
-            {/* Tags */}
-            {product.tags && product.tags.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {product.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Slug/Category tag */}
+            <div className="mt-6">
+              <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
+                {product.slug}
+              </span>
+            </div>
           </div>
         </div>
       </main>

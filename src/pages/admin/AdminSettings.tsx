@@ -15,6 +15,7 @@ interface PromoBanner {
   button_link: string | null;
   value: number | null;
   is_active: boolean;
+  max_installments: number | null;
 }
 
 const AdminSettings = () => {
@@ -46,6 +47,7 @@ const AdminSettings = () => {
         button_link: banner.button_link,
         value: banner.value,
         is_active: banner.is_active,
+        max_installments: banner.max_installments,
       })
       .eq("id", banner.id);
     setSaving(false);
@@ -104,6 +106,17 @@ const AdminSettings = () => {
                 onChange={(e) => setBanner({ ...banner, value: parseFloat(e.target.value) || 0 })}
                 placeholder="299"
               />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Número de Parcelas</label>
+              <Input
+                type="number"
+                value={banner.max_installments ?? 10}
+                onChange={(e) => setBanner({ ...banner, max_installments: parseInt(e.target.value) || 10 })}
+                placeholder="10"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Ex: 5 para exibir "5x sem juros" no site</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import ProductImageManager from "./ProductImageManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -33,6 +34,7 @@ export interface ProductFormData {
   is_active: boolean;
   is_new: boolean;
   category_id: string;
+  sku: string;
 }
 
 const MAIN_CATEGORIES = [
@@ -51,6 +53,7 @@ export const emptyForm: ProductFormData = {
   is_active: true,
   is_new: false,
   category_id: "",
+  sku: "",
 };
 
 interface VariantRow {
@@ -81,6 +84,7 @@ const COLORS = [
 
 const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }: ProductFormDialogProps) => {
   const [form, setForm] = useState<ProductFormData>(initialForm || emptyForm);
+  const [savedProductId, setSavedProductId] = useState<string | null>(editId);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -89,7 +93,8 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
   useEffect(() => {
     if (initialForm) setForm(initialForm);
     else setForm(emptyForm);
-  }, [initialForm, open]);
+    setSavedProductId(editId);
+  }, [initialForm, open, editId]);
 
   useEffect(() => {
     if (editId && open) {
@@ -195,6 +200,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       is_active: form.is_active,
       is_new: form.is_new,
       category_id: form.category_id,
+      sku: form.sku || null,
     };
 
     let error;
@@ -206,6 +212,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       const res = await supabase.from("products").insert(payload).select("id").single();
       error = res.error;
       productId = res.data?.id || null;
+      if (productId) setSavedProductId(productId);
     }
 
     if (error) {
@@ -253,9 +260,15 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
             <Label>Nome</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: generateSlug(e.target.value) })} />
           </div>
-          <div>
-            <Label>Slug</Label>
-            <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Slug</Label>
+              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+            </div>
+            <div>
+              <Label>Código do Produto</Label>
+              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="Ex: DI-001" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -395,6 +408,11 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
             <Button variant="outline" size="sm" onClick={generateVariants} className="w-full">
               Regerar Variações
             </Button>
+          )}
+
+          {/* Image Manager - only show after product is saved */}
+          {savedProductId && (
+            <ProductImageManager productId={savedProductId} onImagesChange={onSaved} />
           )}
 
           <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
