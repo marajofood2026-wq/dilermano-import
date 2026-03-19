@@ -200,6 +200,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       is_active: form.is_active,
       is_new: form.is_new,
       category_id: form.category_id,
+      sku: form.sku || null,
     };
 
     let error;
