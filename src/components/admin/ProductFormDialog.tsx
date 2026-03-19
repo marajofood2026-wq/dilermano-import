@@ -34,6 +34,7 @@ export interface ProductFormData {
   is_active: boolean;
   is_new: boolean;
   category_id: string;
+  sku: string;
 }
 
 const MAIN_CATEGORIES = [
