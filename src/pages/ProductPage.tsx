@@ -200,7 +200,7 @@ const ProductPage = () => {
             </div>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              ou 10x de {formatPrice(effectivePrice / 10)} sem juros
+              ou {maxInstallments}x de {formatPrice(effectivePrice / maxInstallments)} sem juros
             </p>
 
             {product.description && (
