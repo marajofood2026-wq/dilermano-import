@@ -42,6 +42,7 @@ const COLORS_MAP: Record<string, string> = {
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const maxInstallments = useMaxInstallments();
   const { addItem } = useCart();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
