@@ -410,6 +410,11 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
             </Button>
           )}
 
+          {/* Image Manager - only show after product is saved */}
+          {savedProductId && (
+            <ProductImageManager productId={savedProductId} onImagesChange={onSaved} />
+          )}
+
           <Button onClick={handleSave} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
             {editId ? "Salvar Alterações" : "Criar Produto"}
           </Button>
