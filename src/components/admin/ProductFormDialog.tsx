@@ -84,6 +84,7 @@ const COLORS = [
 
 const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }: ProductFormDialogProps) => {
   const [form, setForm] = useState<ProductFormData>(initialForm || emptyForm);
+  const [savedProductId, setSavedProductId] = useState<string | null>(editId);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
