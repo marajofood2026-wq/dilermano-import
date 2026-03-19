@@ -53,6 +53,7 @@ export const emptyForm: ProductFormData = {
   is_active: true,
   is_new: false,
   category_id: "",
+  sku: "",
 };
 
 interface VariantRow {
