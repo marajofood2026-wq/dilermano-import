@@ -212,6 +212,7 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
       const res = await supabase.from("products").insert(payload).select("id").single();
       error = res.error;
       productId = res.data?.id || null;
+      if (productId) setSavedProductId(productId);
     }
 
     if (error) {
