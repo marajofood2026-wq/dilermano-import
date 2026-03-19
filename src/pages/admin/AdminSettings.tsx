@@ -108,6 +108,17 @@ const AdminSettings = () => {
               />
             </div>
 
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Número de Parcelas</label>
+              <Input
+                type="number"
+                value={banner.max_installments ?? 10}
+                onChange={(e) => setBanner({ ...banner, max_installments: parseInt(e.target.value) || 10 })}
+                placeholder="10"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Ex: 5 para exibir "5x sem juros" no site</p>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Texto do botão</label>
