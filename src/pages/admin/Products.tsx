@@ -69,6 +69,7 @@ const Products = () => {
       is_active: p.is_active,
       is_new: p.is_new ?? false,
       category_id: p.category_id || "",
+      sku: p.sku || "",
     });
     setEditId(p.id);
     setDialogOpen(true);
