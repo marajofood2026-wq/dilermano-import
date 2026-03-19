@@ -47,6 +47,7 @@ const AdminSettings = () => {
         button_link: banner.button_link,
         value: banner.value,
         is_active: banner.is_active,
+        max_installments: banner.max_installments,
       })
       .eq("id", banner.id);
     setSaving(false);
