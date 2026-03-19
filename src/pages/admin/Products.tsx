@@ -24,6 +24,7 @@ interface Product {
   is_active: boolean;
   is_new: boolean;
   category_id: string | null;
+  sku: string | null;
   categories?: { name: string } | null;
 }
 
