@@ -62,6 +62,7 @@ const CheckoutPage = () => {
   const [pixProof, setPixProof] = useState<File | null>(null);
   const [pixProofUploading, setPixProofUploading] = useState(false);
 
+  const maxInstallments = useMaxInstallments();
   const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
   const { isFree: hasFreeShipping } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
