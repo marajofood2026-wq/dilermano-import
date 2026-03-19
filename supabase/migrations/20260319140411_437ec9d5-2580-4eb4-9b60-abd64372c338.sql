@@ -1,0 +1,1 @@
+ALTER TABLE public.promo_banner ADD COLUMN IF NOT EXISTS max_installments integer DEFAULT 10;
