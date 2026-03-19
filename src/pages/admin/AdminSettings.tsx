@@ -15,6 +15,7 @@ interface PromoBanner {
   button_link: string | null;
   value: number | null;
   is_active: boolean;
+  max_installments: number | null;
 }
 
 const AdminSettings = () => {
