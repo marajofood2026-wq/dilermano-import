@@ -260,9 +260,15 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
             <Label>Nome</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: generateSlug(e.target.value) })} />
           </div>
-          <div>
-            <Label>Slug</Label>
-            <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Slug</Label>
+              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+            </div>
+            <div>
+              <Label>Código do Produto</Label>
+              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="Ex: DI-001" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
