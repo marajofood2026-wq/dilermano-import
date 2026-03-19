@@ -93,7 +93,8 @@ const ProductFormDialog = ({ open, onOpenChange, editId, initialForm, onSaved }:
   useEffect(() => {
     if (initialForm) setForm(initialForm);
     else setForm(emptyForm);
-  }, [initialForm, open]);
+    setSavedProductId(editId);
+  }, [initialForm, open, editId]);
 
   useEffect(() => {
     if (editId && open) {
