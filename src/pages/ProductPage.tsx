@@ -284,16 +284,12 @@ const ProductPage = () => {
               {effectiveStock > 0 ? `${effectiveStock} unidades em estoque` : "Produto esgotado"}
             </p>
 
-            {/* Tags */}
-            {product.tags && product.tags.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {product.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Slug/Category tag */}
+            <div className="mt-6">
+              <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
+                {product.slug}
+              </span>
+            </div>
           </div>
         </div>
       </main>
