@@ -58,6 +58,9 @@ const CheckoutPage = () => {
 
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [step, setStep] = useState<"address" | "payment">("address");
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "pix" | "whatsapp" | null>(null);
+  const [pixProof, setPixProof] = useState<File | null>(null);
+  const [pixProofUploading, setPixProofUploading] = useState(false);
 
   const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
   const { isFree: hasFreeShipping } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
