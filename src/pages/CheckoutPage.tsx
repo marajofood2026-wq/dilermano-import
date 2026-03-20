@@ -478,6 +478,42 @@ const CheckoutPage = () => {
                           </span>
                         </button>
                       ))}
+
+                      {/* WhatsApp negotiated shipping */}
+                      <button
+                        onClick={() => setSelectedShipping({ service: "Frete negociado via WhatsApp", price: whatsappShippingPrice, original_price: 0, days: 0, free: false, isWhatsApp: true })}
+                        className={`flex w-full items-center justify-between rounded-lg border p-4 text-left transition-colors ${
+                          selectedShipping?.isWhatsApp ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <MessageCircle size={16} className="text-[#25D366]" />
+                          <div>
+                            <span className="font-medium text-foreground">Frete negociado via WhatsApp</span>
+                            <span className="ml-2 text-xs text-muted-foreground">Combine com o vendedor</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {selectedShipping?.isWhatsApp && (
+                        <div className="rounded-lg border border-border bg-background p-4">
+                          <Label className="text-sm font-medium">Valor do frete combinado (R$)</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            placeholder="0,00"
+                            value={whatsappShippingPrice || ""}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              setWhatsappShippingPrice(val);
+                              setSelectedShipping({ service: "Frete negociado via WhatsApp", price: val, original_price: 0, days: 0, free: false, isWhatsApp: true });
+                            }}
+                            className="mt-1"
+                          />
+                          <p className="mt-1 text-xs text-muted-foreground">Informe o valor acordado com o vendedor pelo WhatsApp</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

@@ -29,6 +29,7 @@ const CartPage = () => {
   const { user } = useAuth();
 
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const maxInstallments = useMaxInstallments();
   const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
   const { isFree: hasFreeShipping, remaining: remainingForFreeShipping, progress: freeShippingProgress } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
