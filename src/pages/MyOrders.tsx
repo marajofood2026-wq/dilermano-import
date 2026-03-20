@@ -130,17 +130,21 @@ const MyOrders = () => {
                 {expandedOrder === order.id && (
                   <div className="border-t border-border p-4">
                     {/* Tracking */}
-                    {order.tracking_code && (
-                      <div className="mb-4 flex items-center gap-2 rounded-md bg-muted p-3">
-                        <Truck size={16} className="text-primary" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            {order.shipping_carrier || "Correios"} — Rastreio:
-                          </p>
-                          <p className="font-mono text-sm font-bold text-foreground">{order.tracking_code}</p>
-                        </div>
+                    <div className="mb-4 flex items-center gap-2 rounded-md bg-muted p-3">
+                      <Truck size={16} className="text-primary" />
+                      <div>
+                        {order.tracking_code ? (
+                          <>
+                            <p className="text-xs text-muted-foreground">
+                              {order.shipping_carrier || "Correios"} — Rastreio:
+                            </p>
+                            <p className="font-mono text-sm font-bold text-foreground">{order.tracking_code}</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Aguardando código de rastreio</p>
+                        )}
                       </div>
-                    )}
+                    </div>
 
                     {/* Items */}
                     <div className="space-y-2">
