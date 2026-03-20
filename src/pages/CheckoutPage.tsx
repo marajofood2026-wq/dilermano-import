@@ -183,7 +183,7 @@ const CheckoutPage = () => {
       : appliedCoupon.discount_value
     : 0;
 
-  const shippingCost = selectedShipping?.price || 0;
+  const shippingCost = selectedShipping?.isWhatsApp ? whatsappShippingPrice : (selectedShipping?.price || 0);
   const orderTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
 
   const isAddressValid = address.zip_code.replace(/\D/g, "").length === 8 &&
