@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useFreeShippingThreshold, getFreeShippingStatus } from "@/hooks/useFreeShippingThreshold";
 
@@ -265,6 +265,30 @@ const CartPage = () => {
               <Link to="/" className="mt-3 block text-center text-xs text-primary hover:underline">
                 Continuar comprando
               </Link>
+            </div>
+
+            {/* WhatsApp negotiation */}
+            <div className="rounded-lg border border-border bg-card p-6">
+              <div className="flex items-center gap-2">
+                <MessageCircle size={16} className="text-[#25D366]" />
+                <h3 className="text-sm font-bold text-foreground">Negociar entrega com o vendedor</h3>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Fale direto pelo WhatsApp para combinar a entrega e forma de pagamento.
+              </p>
+              <Button
+                onClick={() => {
+                  const itemsList = items.map((i) => `• ${i.name} x${i.quantity} - ${formatPrice(i.price * i.quantity)}`).join("%0A");
+                  const msg = `Olá! Gostaria de negociar a entrega do meu pedido.%0A%0A` +
+                    `*Itens:*%0A${itemsList}%0A%0A` +
+                    `💰 *Total:* ${formatPrice(totalPrice)}`;
+                  window.open(`https://wa.me/5591983997964?text=${msg}`, "_blank");
+                }}
+                className="mt-3 w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Abrir WhatsApp
+              </Button>
             </div>
           </div>
         </div>

@@ -599,19 +599,6 @@ const CheckoutPage = () => {
                       </div>
                     </button>
 
-                    {/* WhatsApp */}
-                    <button
-                      onClick={() => setPaymentMethod("whatsapp")}
-                      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
-                        paymentMethod === "whatsapp" ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      <MessageCircle size={20} className="text-muted-foreground" />
-                      <div>
-                        <p className="font-medium text-foreground">Negociar entrega com o vendedor</p>
-                        <p className="text-xs text-muted-foreground">Fale direto pelo WhatsApp</p>
-                      </div>
-                    </button>
                   </div>
 
                   {/* Stripe payment */}
@@ -740,29 +727,6 @@ const CheckoutPage = () => {
                     </div>
                   )}
 
-                  {/* WhatsApp negotiation */}
-                  {paymentMethod === "whatsapp" && (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted-foreground">
-                        Negocie a entrega e forma de pagamento diretamente com o vendedor pelo WhatsApp.
-                      </p>
-                      <Button
-                        onClick={() => {
-                          const itemsList = items.map((i) => `• ${i.name} x${i.quantity} - ${formatPrice(i.price * i.quantity)}`).join("%0A");
-                          const addr = `${address.street}, ${address.number}${address.complement ? " - " + address.complement : ""}, ${address.neighborhood}, ${address.city}/${address.state} - CEP ${address.zip_code}`;
-                          const msg = `Olá! Gostaria de negociar a entrega do meu pedido.%0A%0A` +
-                            `*Itens:*%0A${itemsList}%0A%0A` +
-                            `💰 *Total:* ${formatPrice(orderTotal)}%0A` +
-                            `📍 *Endereço:* ${addr}`;
-                          window.open(`https://wa.me/5591983997964?text=${msg}`, "_blank");
-                        }}
-                        className="mt-4 w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
-                      >
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Abrir WhatsApp
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </>
             )}
