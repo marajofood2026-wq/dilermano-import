@@ -50,6 +50,7 @@ const CheckoutPage = () => {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingRegion, setShippingRegion] = useState("");
+  const [whatsappShippingPrice, setWhatsappShippingPrice] = useState<number>(0);
 
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
