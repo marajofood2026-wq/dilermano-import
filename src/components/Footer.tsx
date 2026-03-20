@@ -56,7 +56,7 @@ const Footer = () => {
                   Trocas e Devoluções
                 </a>
               </li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Rastrear Pedido</a></li>
+              <li><Link to="/meus-pedidos" className="transition-colors hover:text-foreground">Rastrear Pedido</Link></li>
             </ul>
           </div>
 
