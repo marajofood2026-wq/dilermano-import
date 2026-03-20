@@ -21,6 +21,7 @@ interface ShippingOption {
   original_price: number;
   days: number;
   free: boolean;
+  isWhatsApp?: boolean;
 }
 
 interface AddressForm {
