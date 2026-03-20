@@ -252,7 +252,7 @@ const CartPage = () => {
                     <span className="text-lg font-bold text-foreground">{formatPrice(orderTotal)}</span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    ou 10x de {formatPrice(orderTotal / 10)} sem juros
+                    ou {maxInstallments}x de {formatPrice(orderTotal / maxInstallments)} sem juros
                   </p>
                 </div>
               </div>
