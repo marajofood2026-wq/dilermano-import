@@ -599,19 +599,6 @@ const CheckoutPage = () => {
                       </div>
                     </button>
 
-                    {/* WhatsApp */}
-                    <button
-                      onClick={() => setPaymentMethod("whatsapp")}
-                      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
-                        paymentMethod === "whatsapp" ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      <MessageCircle size={20} className="text-muted-foreground" />
-                      <div>
-                        <p className="font-medium text-foreground">Negociar entrega com o vendedor</p>
-                        <p className="text-xs text-muted-foreground">Fale direto pelo WhatsApp</p>
-                      </div>
-                    </button>
                   </div>
 
                   {/* Stripe payment */}
