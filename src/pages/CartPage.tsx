@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMaxInstallments } from "@/hooks/useMaxInstallments";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -28,6 +29,7 @@ const CartPage = () => {
   const { user } = useAuth();
 
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const maxInstallments = useMaxInstallments();
   const { threshold: freeShippingThreshold } = useFreeShippingThreshold();
   const { isFree: hasFreeShipping, remaining: remainingForFreeShipping, progress: freeShippingProgress } = getFreeShippingStatus(totalPrice, freeShippingThreshold);
 
@@ -252,7 +254,7 @@ const CartPage = () => {
                     <span className="text-lg font-bold text-foreground">{formatPrice(orderTotal)}</span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    ou 10x de {formatPrice(orderTotal / 10)} sem juros
+                    ou {maxInstallments}x de {formatPrice(orderTotal / maxInstallments)} sem juros
                   </p>
                 </div>
               </div>

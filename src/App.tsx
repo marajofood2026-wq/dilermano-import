@@ -58,6 +58,7 @@ const App = () => (
               <Route path="/minha-conta" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
               <Route path="/meus-pedidos" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
               <Route path="/produto/:slug" element={<ProductPage />} />
+              <Route path="/categoria/:slug" element={<CategoryPage />} />
               <Route path="/:slug" element={<CategoryPage />} />
 
               {/* Admin */}
