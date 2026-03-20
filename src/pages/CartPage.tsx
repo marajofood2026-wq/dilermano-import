@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, Truck, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useFreeShippingThreshold, getFreeShippingStatus } from "@/hooks/useFreeShippingThreshold";
 
