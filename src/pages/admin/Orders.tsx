@@ -180,7 +180,7 @@ const Orders = () => {
                     <span className="text-sm font-semibold text-foreground">Status do pedido</span>
                     <Select
                       value={o.status}
-                      onValueChange={(value) => updateOrderStatus(o.id, value)}
+                      onValueChange={(value) => updateOrderStatus(o.id, value as OrderStatus)}
                       disabled={statusSaving === o.id}
                     >
                       <SelectTrigger className="bg-background">
