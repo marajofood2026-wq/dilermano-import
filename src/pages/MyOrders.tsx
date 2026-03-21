@@ -1,34 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Package, ChevronDown, ChevronUp, Truck } from "lucide-react";
-
-interface OrderItem {
-  id: string;
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  variant_name: string | null;
-}
-
-interface Order {
-  id: string;
-  order_number: string;
-  status: string;
-  payment_status: string;
-  total: number;
-  subtotal: number;
-  shipping_cost: number | null;
-  tracking_code: string | null;
-  shipping_carrier: string | null;
-  created_at: string;
-  order_items: OrderItem[];
-}
+import { fetchOrdersWithDetails, type OrderSummary } from "@/lib/orders";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
@@ -52,19 +29,15 @@ const statusColors: Record<string, string> = {
 
 const MyOrders = () => {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     const fetchOrders = async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("id, order_number, status, payment_status, total, subtotal, shipping_cost, tracking_code, shipping_carrier, created_at, order_items(id, product_name, quantity, unit_price, total_price, variant_name)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-      setOrders((data as any) || []);
+      const data = await fetchOrdersWithDetails({ userId: user.id });
+      setOrders(data);
       setLoading(false);
     };
     fetchOrders();
@@ -130,7 +103,7 @@ const MyOrders = () => {
                 {expandedOrder === order.id && (
                   <div className="border-t border-border p-4">
                     {/* Tracking */}
-                    <div className="mb-4 flex items-center gap-2 rounded-md bg-muted p-3">
+                      <div className="mb-4 flex items-center gap-2 rounded-md bg-muted p-3">
                       <Truck size={16} className="text-primary" />
                       <div>
                         {order.tracking_code ? (
@@ -143,6 +116,9 @@ const MyOrders = () => {
                         ) : (
                           <p className="text-sm text-muted-foreground">Aguardando código de rastreio</p>
                         )}
+                          {!!order.shipping_carrier && (
+                            <p className="mt-1 text-xs text-muted-foreground">Frete: {order.shipping_carrier}</p>
+                          )}
                       </div>
                     </div>
 
@@ -170,6 +146,12 @@ const MyOrders = () => {
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Frete</span>
                           <span className="text-foreground">{formatPrice(order.shipping_cost)}</span>
+                        </div>
+                      )}
+                      {order.discount_amount != null && order.discount_amount > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Desconto</span>
+                          <span className="text-foreground">-{formatPrice(order.discount_amount)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-bold">
