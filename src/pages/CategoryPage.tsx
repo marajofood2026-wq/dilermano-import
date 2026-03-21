@@ -117,6 +117,7 @@ const CategoryPage = () => {
                   name={p.name}
                   price={p.price}
                   originalPrice={p.original_price || undefined}
+                  category={categoryName}
                   badge={getBadge(p)}
                 />
               </Link>
