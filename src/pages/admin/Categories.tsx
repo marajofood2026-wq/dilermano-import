@@ -11,6 +11,8 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
+const MAX_CATEGORIES = 6;
+
 interface Category {
   id: string;
   name: string;
@@ -24,7 +26,7 @@ const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", slug: "", sort_order: "0" });
+  const [form, setForm] = useState({ name: "", sort_order: "0" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,7 +40,7 @@ const Categories = () => {
   useEffect(() => { fetchCategories(); }, []);
 
   const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,13 +69,25 @@ const Categories = () => {
   };
 
   const handleSave = async () => {
+    if (!form.name.trim()) {
+      toast.error("Informe o nome da categoria");
+      return;
+    }
+
+    // Enforce limit when creating new
+    if (!editId && categories.length >= MAX_CATEGORIES) {
+      toast.error(`Limite máximo de ${MAX_CATEGORIES} categorias atingido`);
+      return;
+    }
+
     setSaving(true);
-    const slug = form.slug || generateSlug(form.name);
     const payload: any = {
       name: form.name,
-      slug,
+      slug: editId ? undefined : generateSlug(form.name),
       sort_order: parseInt(form.sort_order) || 0,
     };
+    // Remove undefined keys
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
     let error;
     let categoryId = editId;
@@ -104,7 +118,7 @@ const Categories = () => {
 
   const resetForm = () => {
     setEditId(null);
-    setForm({ name: "", slug: "", sort_order: "0" });
+    setForm({ name: "", sort_order: "0" });
     setImageFile(null);
     setImagePreview(null);
   };
@@ -117,28 +131,32 @@ const Categories = () => {
   };
 
   const openEdit = (c: Category) => {
-    setForm({ name: c.name, slug: c.slug, sort_order: String(c.sort_order) });
+    setForm({ name: c.name, sort_order: String(c.sort_order) });
     setEditId(c.id);
     setImageFile(null);
     setImagePreview(c.image_url || null);
     setDialogOpen(true);
   };
 
+  const canCreate = categories.length < MAX_CATEGORIES;
+
   return (
     <div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Categorias</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{categories.length} categorias</p>
+          <p className="mt-1 text-sm text-muted-foreground">{categories.length} / {MAX_CATEGORIES} categorias</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-ocean text-primary-foreground hover:opacity-90">
+            <Button
+              disabled={!canCreate && !editId}
+              className="bg-gradient-ocean text-primary-foreground hover:opacity-90"
+            >
               <Plus className="mr-2 h-4 w-4" /> Nova Categoria
             </Button>
           </DialogTrigger>
           <DialogContent className="flex max-h-[90vh] max-w-sm flex-col gap-0 overflow-hidden p-0 [&>button:last-child]:hidden">
-            {/* HEADER */}
             <div className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
               <DialogTitle>{editId ? "Editar" : "Nova"} Categoria</DialogTitle>
               <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -147,16 +165,11 @@ const Categories = () => {
               </DialogClose>
             </div>
 
-            {/* BODY */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="space-y-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Nome</label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: generateSlug(e.target.value) })} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Slug (texto exibido no front)</label>
-                  <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Ordem</label>
@@ -164,6 +177,9 @@ const Categories = () => {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Imagem de Capa</label>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    📐 Recomendado: <strong>800×1000 px</strong> (proporção 4:5) · JPG ou PNG · ~300 KB
+                  </p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -198,7 +214,6 @@ const Categories = () => {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div className="border-t border-border bg-background px-6 py-4">
               <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-ocean text-primary-foreground hover:opacity-90">
                 {saving ? "Salvando..." : "Salvar"}
@@ -208,13 +223,18 @@ const Categories = () => {
         </Dialog>
       </div>
 
+      {!canCreate && (
+        <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+          Limite máximo de {MAX_CATEGORIES} categorias atingido. Exclua uma para criar outra.
+        </div>
+      )}
+
       <div className="mt-6 rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Imagem</TableHead>
               <TableHead>Nome</TableHead>
-              <TableHead>Slug</TableHead>
               <TableHead>Ordem</TableHead>
               <TableHead className="w-24">Ações</TableHead>
             </TableRow>
@@ -222,7 +242,7 @@ const Categories = () => {
           <TableBody>
             {categories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">Nenhuma categoria</TableCell>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">Nenhuma categoria</TableCell>
               </TableRow>
             ) : (
               categories.map((c) => (
@@ -235,7 +255,6 @@ const Categories = () => {
                     )}
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{c.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{c.slug}</TableCell>
                   <TableCell className="text-foreground">{c.sort_order}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">

@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { Search, ShoppingBag, User, Menu, X, LogOut, Shield, Package } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,18 +12,42 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-const navLinks = [
-  { label: "Novidades", href: "/novidades" },
-  { label: "Masculino", href: "/masculino" },
-  { label: "Feminino", href: "/feminino" },
-  { label: "Acessórios", href: "/acessorios" },
-  { label: "Promoções", href: "/promocoes" },
+interface NavCategory {
+  id: string;
+  name: string;
+}
+
+const staticLinks = [
+  { label: "Novidades", href: "/categoria/novidades" },
+];
+
+const staticLinksEnd = [
+  { label: "Promoções", href: "/categoria/promocoes" },
 ];
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const { totalItems } = useCart();
+  const [dbCategories, setDbCategories] = useState<NavCategory[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("sort_order");
+      setDbCategories(data || []);
+    };
+    fetch();
+  }, []);
+
+  const navLinks = [
+    ...staticLinks,
+    ...dbCategories.map((c) => ({ label: c.name, href: `/categoria/${c.id}` })),
+    ...staticLinksEnd,
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
