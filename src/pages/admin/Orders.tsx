@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Save, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { fetchOrdersWithDetails, type OrderSummary } from "@/lib/orders";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
@@ -29,11 +33,22 @@ const statusColors: Record<string, string> = {
   refunded: "bg-orange-500/20 text-orange-400",
 };
 
+const orderStatusOptions = [
+  "pending",
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+] as const;
+
 const Orders = () => {
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const [statusSaving, setStatusSaving] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -77,6 +92,24 @@ const Orders = () => {
         prev.map((o) => (o.id === orderId ? { ...o, tracking_code: code } : o))
       );
     }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    setStatusSaving(orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", orderId);
+
+    setStatusSaving(null);
+
+    if (error) {
+      toast.error("Erro ao atualizar status do pedido");
+      return;
+    }
+
+    toast.success("Status do pedido atualizado!");
+    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status } : order)));
   };
 
   return (
@@ -141,6 +174,26 @@ const Orders = () => {
                     </div>
                   </div>
 
+                  <div className="rounded-md bg-muted p-3 space-y-2">
+                    <span className="text-sm font-semibold text-foreground">Status do pedido</span>
+                    <Select
+                      value={o.status}
+                      onValueChange={(value) => updateOrderStatus(o.id, value)}
+                      disabled={statusSaving === o.id}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {orderStatusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {statusLabels[status]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* Items */}
                   <div>
                     <h4 className="mb-2 text-sm font-semibold text-foreground">Produtos</h4>
@@ -177,7 +230,7 @@ const Orders = () => {
                     {o.discount_amount != null && o.discount_amount > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Desconto</span>
-                        <span className="text-green-500">-{formatPrice(o.discount_amount)}</span>
+                          <span className="text-foreground">-{formatPrice(o.discount_amount)}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-bold">

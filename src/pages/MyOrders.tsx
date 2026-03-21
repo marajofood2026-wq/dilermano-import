@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Badge } from "@/components/ui/badge";
 import { Package, ChevronDown, ChevronUp, Truck } from "lucide-react";
 import { fetchOrdersWithDetails, type OrderSummary } from "@/lib/orders";
+import { toast } from "sonner";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
@@ -36,9 +36,15 @@ const MyOrders = () => {
   useEffect(() => {
     if (!user) return;
     const fetchOrders = async () => {
-      const data = await fetchOrdersWithDetails({ userId: user.id });
-      setOrders(data);
-      setLoading(false);
+      try {
+        const data = await fetchOrdersWithDetails({ userId: user.id });
+        setOrders(data);
+      } catch (error) {
+        console.error("Erro ao carregar pedidos do cliente", error);
+        toast.error("Erro ao carregar seus pedidos");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchOrders();
   }, [user]);
