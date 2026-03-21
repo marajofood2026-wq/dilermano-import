@@ -1,39 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Save, Truck } from "lucide-react";
 import { toast } from "sonner";
-
-interface OrderItem {
-  id: string;
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  variant_name: string | null;
-}
-
-interface Order {
-  id: string;
-  order_number: string;
-  status: string;
-  payment_status: string;
-  total: number;
-  subtotal: number;
-  shipping_cost: number | null;
-  discount_amount: number | null;
-  tracking_code: string | null;
-  shipping_carrier: string | null;
-  payment_method: string | null;
-  notes: string | null;
-  created_at: string;
-  profiles?: { full_name: string } | null;
-  order_items: OrderItem[];
-}
+import { fetchOrdersWithDetails, type OrderSummary } from "@/lib/orders";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
@@ -55,25 +33,39 @@ const statusColors: Record<string, string> = {
   refunded: "bg-orange-500/20 text-orange-400",
 };
 
+const orderStatusOptions = [
+  "pending",
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+] as const;
+
+type OrderStatus = (typeof orderStatusOptions)[number];
+
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const [statusSaving, setStatusSaving] = useState<string | null>(null);
 
   const fetchOrders = async () => {
-    const { data } = await supabase
-      .from("orders")
-      .select("id, order_number, status, payment_status, total, subtotal, shipping_cost, discount_amount, tracking_code, shipping_carrier, payment_method, notes, created_at, profiles:user_id(full_name), order_items(id, product_name, quantity, unit_price, total_price, variant_name)")
-      .order("created_at", { ascending: false });
-    const orders = (data as any) || [];
-    setOrders(orders);
-    // Init tracking inputs
-    const inputs: Record<string, string> = {};
-    orders.forEach((o: Order) => {
-      inputs[o.id] = o.tracking_code || "";
-    });
-    setTrackingInputs(inputs);
+    try {
+      const data = await fetchOrdersWithDetails();
+      setOrders(data);
+
+      const inputs: Record<string, string> = {};
+      data.forEach((order) => {
+        inputs[order.id] = order.tracking_code || "";
+      });
+      setTrackingInputs(inputs);
+    } catch (error) {
+      console.error("Erro ao carregar pedidos no admin", error);
+      toast.error("Erro ao carregar pedidos");
+    }
   };
 
   useEffect(() => {
@@ -104,6 +96,24 @@ const Orders = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    setStatusSaving(orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", orderId);
+
+    setStatusSaving(null);
+
+    if (error) {
+      toast.error("Erro ao atualizar status do pedido");
+      return;
+    }
+
+    toast.success("Status do pedido atualizado!");
+    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status } : order)));
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
@@ -123,7 +133,7 @@ const Orders = () => {
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
                   <span className="font-mono text-sm font-bold text-foreground">{o.order_number}</span>
                   <span className="text-xs text-muted-foreground">{formatDate(o.created_at)}</span>
-                  <span className="text-sm text-foreground">{o.profiles?.full_name || "—"}</span>
+                  <span className="text-sm text-foreground">{o.customer_name || "—"}</span>
                   <span className={`inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[o.status] || ""}`}>
                     {statusLabels[o.status] || o.status}
                   </span>
@@ -143,6 +153,9 @@ const Orders = () => {
                       <Truck size={16} className="text-primary" />
                       <span className="text-sm font-semibold text-foreground">Código de Rastreio</span>
                     </div>
+                    {o.shipping_carrier && (
+                      <p className="text-xs text-muted-foreground">Tipo de frete: {o.shipping_carrier}</p>
+                    )}
                     <div className="flex gap-2">
                       <Input
                         placeholder="Ex: BR123456789"
@@ -161,6 +174,26 @@ const Orders = () => {
                         Salvar
                       </Button>
                     </div>
+                  </div>
+
+                  <div className="rounded-md bg-muted p-3 space-y-2">
+                    <span className="text-sm font-semibold text-foreground">Status do pedido</span>
+                    <Select
+                      value={o.status}
+                      onValueChange={(value) => updateOrderStatus(o.id, value as OrderStatus)}
+                      disabled={statusSaving === o.id}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {orderStatusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {statusLabels[status]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Items */}
@@ -183,6 +216,10 @@ const Orders = () => {
                   {/* Totals */}
                   <div className="space-y-1 border-t border-border pt-3 text-sm">
                     <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cliente</span>
+                      <span className="text-foreground">{o.customer_name || "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="text-foreground">{formatPrice(o.subtotal)}</span>
                     </div>
@@ -195,7 +232,7 @@ const Orders = () => {
                     {o.discount_amount != null && o.discount_amount > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Desconto</span>
-                        <span className="text-green-500">-{formatPrice(o.discount_amount)}</span>
+                          <span className="text-foreground">-{formatPrice(o.discount_amount)}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-bold">
