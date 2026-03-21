@@ -43,6 +43,8 @@ const orderStatusOptions = [
   "refunded",
 ] as const;
 
+type OrderStatus = (typeof orderStatusOptions)[number];
+
 const Orders = () => {
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -94,7 +96,7 @@ const Orders = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: string) => {
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
     setStatusSaving(orderId);
     const { error } = await supabase
       .from("orders")
