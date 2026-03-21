@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Phone, Mail, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
@@ -9,6 +11,19 @@ const TikTokIcon = () => (
 
 const Footer = () => {
   const whatsappUrl = "https://wa.me/5591983997964";
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("sort_order");
+      setCategories(data || []);
+    };
+    fetch();
+  }, []);
 
   return (
     <footer className="border-t border-border bg-muted">
@@ -42,10 +57,13 @@ const Footer = () => {
           <div>
             <h4 className="mb-3 text-sm font-semibold text-foreground">Loja</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/masculino" className="transition-colors hover:text-foreground">Masculino</Link></li>
-              <li><Link to="/feminino" className="transition-colors hover:text-foreground">Feminino</Link></li>
-              <li><Link to="/acessorios" className="transition-colors hover:text-foreground">Acessórios</Link></li>
-              <li><Link to="/promocoes" className="transition-colors hover:text-foreground">Promoções</Link></li>
+              {categories.map((c) => (
+                <li key={c.id}>
+                  <Link to={`/categoria/${c.id}`} className="transition-colors hover:text-foreground">{c.name}</Link>
+                </li>
+              ))}
+              <li><Link to="/categoria/novidades" className="transition-colors hover:text-foreground">Novidades</Link></li>
+              <li><Link to="/categoria/promocoes" className="transition-colors hover:text-foreground">Promoções</Link></li>
             </ul>
 
             <h4 className="mb-3 mt-6 text-sm font-semibold text-foreground">Ajuda</h4>

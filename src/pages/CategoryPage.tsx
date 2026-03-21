@@ -16,60 +16,64 @@ interface Product {
   product_images: { url: string; is_primary: boolean }[];
 }
 
-const categoryMap: Record<string, string> = {
-  novidades: "novo",
-  masculino: "Camisetas",
-  feminino: "Feminino",
-  acessorios: "Acessórios",
-  promocoes: "sale",
-};
-
-const titleMap: Record<string, string> = {
-  novidades: "Novidades",
-  masculino: "Masculino",
-  feminino: "Feminino",
-  acessorios: "Acessórios",
-  promocoes: "Promoções",
-};
-
 const CategoryPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!id) return;
       setLoading(true);
-      let query = supabase
-        .from("products")
-        .select("id, name, slug, price, original_price, tags, is_featured, category_id, categories(name, slug), product_images(url, is_primary)")
-        .eq("is_active", true);
 
-      if (slug === "novidades") {
-        query = query.eq("is_new", true);
-      } else if (slug === "promocoes") {
-        // Only products with original_price > price
-        query = query.not("original_price", "is", null);
-      } else if (slug) {
-        const { data: cat } = await supabase.from("categories").select("id").eq("slug", slug).maybeSingle();
-        if (cat) {
-          query = query.eq("category_id", cat.id);
-        }
+      // Special virtual categories
+      if (id === "novidades") {
+        setCategoryName("Novidades");
+        const { data } = await supabase
+          .from("products")
+          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .eq("is_active", true)
+          .eq("is_new", true)
+          .order("created_at", { ascending: false });
+        setProducts((data as any) || []);
+        setLoading(false);
+        return;
       }
 
-      const { data } = await query.order("created_at", { ascending: false });
-      let results = (data as any) || [];
-      
-      // For promoções, filter client-side to ensure original_price > price
-      if (slug === "promocoes") {
-        results = results.filter((p: Product) => p.original_price && p.original_price > p.price);
+      if (id === "promocoes") {
+        setCategoryName("Promoções");
+        const { data } = await supabase
+          .from("products")
+          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .eq("is_active", true)
+          .not("original_price", "is", null)
+          .order("created_at", { ascending: false });
+        const results = ((data as any) || []).filter((p: Product) => p.original_price && p.original_price > p.price);
+        setProducts(results);
+        setLoading(false);
+        return;
       }
-      
-      setProducts(results);
+
+      // Real category by ID
+      const { data: cat } = await supabase.from("categories").select("id, name").eq("id", id).maybeSingle();
+      if (cat) {
+        setCategoryName(cat.name);
+        const { data } = await supabase
+          .from("products")
+          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .eq("is_active", true)
+          .eq("category_id", cat.id)
+          .order("created_at", { ascending: false });
+        setProducts((data as any) || []);
+      } else {
+        setCategoryName("");
+        setProducts([]);
+      }
       setLoading(false);
     };
     fetchProducts();
-  }, [slug]);
+  }, [id]);
 
   const getProductImage = (p: Product) => {
     const primary = p.product_images?.find((img) => img.is_primary);
@@ -87,7 +91,7 @@ const CategoryPage = () => {
       <Header />
       <main className="container pb-16 pt-24">
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-          {titleMap[slug || ""] || slug}
+          {categoryName || "Categoria"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {products.length} produtos encontrados
@@ -113,8 +117,8 @@ const CategoryPage = () => {
                   name={p.name}
                   price={p.price}
                   originalPrice={p.original_price || undefined}
+                  category={categoryName}
                   badge={getBadge(p)}
-                  category={(p as any).categories?.name || ""}
                 />
               </Link>
             ))}

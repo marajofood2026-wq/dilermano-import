@@ -34,19 +34,6 @@ const fallbackImages: Record<string, string> = {
   "vestido-floral-resort": prodDress,
 };
 
-// Fallback images by slug for categories without uploaded images
-const categoryFallbackImages: Record<string, string> = {
-  masculino: catMens,
-  feminino: catWomens,
-  acessorios: catAccessories,
-};
-
-const defaultCategories = [
-  { image: catMens, title: "Masculino", href: "/masculino" },
-  { image: catWomens, title: "Feminino", href: "/feminino" },
-  { image: catAccessories, title: "Acessórios", href: "/acessorios" },
-];
-
 interface Product {
   id: string;
   name: string;
@@ -63,7 +50,6 @@ interface Product {
 interface CategoryRow {
   id: string;
   name: string;
-  slug: string;
   image_url: string | null;
   sort_order: number | null;
 }
@@ -99,7 +85,7 @@ const Index = () => {
     const fetchCategories = async () => {
       const { data } = await supabase
         .from("categories")
-        .select("id, name, slug, image_url, sort_order")
+        .select("id, name, image_url, sort_order")
         .eq("is_active", true)
         .order("sort_order");
       setDbCategories((data as CategoryRow[]) || []);
@@ -132,20 +118,23 @@ const Index = () => {
     return undefined;
   };
 
-  // Build category list: use DB if available, otherwise fallback
+  // Build category list from DB
   const categoryCards = dbCategories.length > 0
     ? dbCategories.map((c) => ({
-        image: c.image_url || categoryFallbackImages[c.slug] || "/placeholder.svg",
+        image: c.image_url || "/placeholder.svg",
         title: c.name,
-        href: `/${c.slug}`,
+        href: `/categoria/${c.id}`,
       }))
-    : defaultCategories;
+    : [
+        { image: catMens, title: "Masculino", href: "/categoria/novidades" },
+        { image: catWomens, title: "Feminino", href: "/categoria/novidades" },
+        { image: catAccessories, title: "Acessórios", href: "/categoria/novidades" },
+      ];
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero: Carousel if banners exist, otherwise static hero */}
       <HeroCarousel
         fallback={
           <section className="relative flex min-h-[85vh] items-center pt-16">
@@ -164,10 +153,10 @@ const Index = () => {
                   Peças importadas com qualidade premium. Surf, street e lifestyle em um só lugar.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link to="/novidades" className="inline-flex items-center gap-2 rounded-md bg-gradient-ocean px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+                  <Link to="/categoria/novidades" className="inline-flex items-center gap-2 rounded-md bg-gradient-ocean px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
                     Explorar Coleção <ArrowRight size={16} />
                   </Link>
-                  <Link to="/promocoes" className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
+                  <Link to="/categoria/promocoes" className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
                     Ver Promoções
                   </Link>
                 </div>
@@ -185,7 +174,7 @@ const Index = () => {
             <p className="mt-1 text-sm text-muted-foreground">Encontre seu estilo</p>
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className={`grid gap-4 ${categoryCards.length <= 3 ? "sm:grid-cols-3" : categoryCards.length <= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
           {categoryCards.map((cat) => (
             <CategoryCard key={cat.title} {...cat} />
           ))}
@@ -199,7 +188,7 @@ const Index = () => {
             <h2 className="text-2xl font-bold tracking-tight text-foreground">Destaques</h2>
             <p className="mt-1 text-sm text-muted-foreground">Os mais procurados da semana</p>
           </div>
-          <Link to="/novidades" className="hidden text-sm font-medium text-primary transition-colors hover:text-ocean-glow sm:inline-flex sm:items-center sm:gap-1">
+          <Link to="/categoria/novidades" className="hidden text-sm font-medium text-primary transition-colors hover:text-ocean-glow sm:inline-flex sm:items-center sm:gap-1">
             Ver todos <ArrowRight size={14} />
           </Link>
         </div>
@@ -233,7 +222,7 @@ const Index = () => {
                 </p>
               )}
               {promoBanner.button_text && (
-                <Link to={promoBanner.button_link || "/novidades"} className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-opacity hover:opacity-90">
+                <Link to={promoBanner.button_link || "/categoria/novidades"} className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-opacity hover:opacity-90">
                   {promoBanner.button_text} <ArrowRight size={16} />
                 </Link>
               )}
@@ -253,7 +242,7 @@ const Index = () => {
               <p className="mt-2 max-w-md text-sm text-muted-foreground">
                 Explore peças exclusivas com qualidade premium. Surf, street e lifestyle em um só lugar.
               </p>
-              <Link to="/novidades" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+              <Link to="/categoria/novidades" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
                 Explorar Coleção <ArrowRight size={16} />
               </Link>
             </div>
