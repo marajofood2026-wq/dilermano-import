@@ -63,12 +63,9 @@ const HeroCarousel = ({ fallback }: HeroCarouselProps) => {
   return (
     <section className="relative w-full overflow-hidden pt-16" style={{ minHeight: "85vh" }}>
       {banners.map((banner, i) => {
-        const Wrapper = banner.link_url ? Link : "div";
-        const wrapperProps = banner.link_url ? { to: banner.link_url } : {};
         return (
-          <Wrapper
+          <div
             key={banner.id}
-            {...(wrapperProps as any)}
             className={cn(
               "absolute inset-0 transition-opacity duration-700 ease-in-out",
               i === current ? "opacity-100 z-10" : "opacity-0 z-0"
@@ -90,8 +87,14 @@ const HeroCarousel = ({ fallback }: HeroCarouselProps) => {
                   {banner.subtitle}
                 </p>
               )}
+              <button
+                onClick={() => document.getElementById('categorias')?.scrollIntoView({ behavior: 'smooth' })}
+                className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Comprar Agora
+              </button>
             </div>
-          </Wrapper>
+          </div>
         );
       })}
 
