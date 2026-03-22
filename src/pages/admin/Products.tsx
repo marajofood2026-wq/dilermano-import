@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import ProductFormDialog, { emptyForm, generateSlug, type ProductFormData } from "@/components/admin/ProductFormDialog";
+import ProductFormDialog, { emptyForm, type ProductFormData } from "@/components/admin/ProductFormDialog";
 
 interface Product {
   id: string;
