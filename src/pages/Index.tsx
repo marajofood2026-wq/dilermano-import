@@ -98,7 +98,7 @@ const Index = () => {
         .from("products")
         .select("id, name, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
         .eq("is_active", true)
-        .eq("is_featured", true)
+        .or("is_featured.eq.true,is_new.eq.true")
         .order("created_at", { ascending: false })
         .limit(8);
       setProducts((data as any) || []);
