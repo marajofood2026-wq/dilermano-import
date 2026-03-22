@@ -284,10 +284,10 @@ const ProductPage = () => {
               {effectiveStock > 0 ? `${effectiveStock} unidades em estoque` : "Produto esgotado"}
             </p>
 
-            {/* Slug/Category tag */}
+            {/* Category tag */}
             <div className="mt-6">
               <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                {product.slug}
+                {product.categories?.name || "Sem categoria"}
               </span>
             </div>
           </div>
