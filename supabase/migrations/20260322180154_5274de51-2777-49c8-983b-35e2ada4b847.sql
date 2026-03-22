@@ -1,0 +1,2 @@
+ALTER TABLE public.products ALTER COLUMN slug SET DEFAULT '';
+ALTER TABLE public.products ALTER COLUMN slug DROP NOT NULL;

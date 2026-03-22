@@ -20,7 +20,6 @@ interface ProductVariant {
 interface ProductDetail {
   id: string;
   name: string;
-  slug: string;
   description: string | null;
   short_description: string | null;
   price: number;
@@ -41,7 +40,7 @@ const COLORS_MAP: Record<string, string> = {
 };
 
 const ProductPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const maxInstallments = useMaxInstallments();
   const { addItem } = useCart();
   const [product, setProduct] = useState<ProductDetail | null>(null);
@@ -56,15 +55,15 @@ const ProductPage = () => {
       setLoading(true);
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, description, short_description, price, original_price, stock_quantity, brand, tags, is_new, categories(name), product_images(url, alt_text, is_primary, sort_order), product_variants(id, name, stock_quantity, price_override, attributes)")
-        .eq("slug", slug)
+        .select("id, name, description, short_description, price, original_price, stock_quantity, brand, tags, is_new, categories(name), product_images(url, alt_text, is_primary, sort_order), product_variants(id, name, stock_quantity, price_override, attributes)")
+        .eq("id", id)
         .eq("is_active", true)
         .maybeSingle();
       setProduct(data as any);
       setLoading(false);
     };
     fetchProduct();
-  }, [slug]);
+  }, [id]);
 
   // Derive available colors and sizes
   const variants = product?.product_variants || [];
@@ -284,10 +283,10 @@ const ProductPage = () => {
               {effectiveStock > 0 ? `${effectiveStock} unidades em estoque` : "Produto esgotado"}
             </p>
 
-            {/* Slug/Category tag */}
+            {/* Category tag */}
             <div className="mt-6">
               <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                {product.slug}
+                {product.categories?.name || "Sem categoria"}
               </span>
             </div>
           </div>

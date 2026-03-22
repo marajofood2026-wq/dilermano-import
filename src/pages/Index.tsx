@@ -37,7 +37,6 @@ const fallbackImages: Record<string, string> = {
 interface Product {
   id: string;
   name: string;
-  slug: string;
   price: number;
   original_price: number | null;
   tags: string[] | null;
@@ -97,7 +96,7 @@ const Index = () => {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
+        .select("id, name, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
         .eq("is_active", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
@@ -109,7 +108,7 @@ const Index = () => {
 
   const getImage = (p: Product) => {
     const primary = p.product_images?.find((img) => img.is_primary);
-    return primary?.url || p.product_images?.[0]?.url || fallbackImages[p.slug] || "/placeholder.svg";
+    return primary?.url || p.product_images?.[0]?.url || "/placeholder.svg";
   };
 
   const getBadge = (p: Product): "novo" | "sale" | undefined => {
@@ -194,7 +193,7 @@ const Index = () => {
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
-            <Link key={product.id} to={`/produto/${product.slug}`}>
+            <Link key={product.id} to={`/produto/${product.id}`}>
               <ProductCard
                 image={getImage(product)}
                 name={product.name}

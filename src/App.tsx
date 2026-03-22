@@ -57,7 +57,7 @@ const App = () => (
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
               <Route path="/minha-conta" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
               <Route path="/meus-pedidos" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-              <Route path="/produto/:slug" element={<ProductPage />} />
+              <Route path="/produto/:id" element={<ProductPage />} />
               <Route path="/categoria/:id" element={<CategoryPage />} />
 
               {/* Admin */}

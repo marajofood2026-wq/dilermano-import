@@ -8,7 +8,6 @@ import ProductCard from "@/components/ProductCard";
 interface Product {
   id: string;
   name: string;
-  slug: string;
   price: number;
   original_price: number | null;
   tags: string[] | null;
@@ -32,7 +31,7 @@ const CategoryPage = () => {
         setCategoryName("Novidades");
         const { data } = await supabase
           .from("products")
-          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .select("id, name, price, original_price, tags, is_featured, product_images(url, is_primary)")
           .eq("is_active", true)
           .eq("is_new", true)
           .order("created_at", { ascending: false });
@@ -45,7 +44,7 @@ const CategoryPage = () => {
         setCategoryName("Promoções");
         const { data } = await supabase
           .from("products")
-          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .select("id, name, price, original_price, tags, is_featured, product_images(url, is_primary)")
           .eq("is_active", true)
           .not("original_price", "is", null)
           .order("created_at", { ascending: false });
@@ -61,7 +60,7 @@ const CategoryPage = () => {
         setCategoryName(cat.name);
         const { data } = await supabase
           .from("products")
-          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .select("id, name, price, original_price, tags, is_featured, product_images(url, is_primary)")
           .eq("is_active", true)
           .eq("category_id", cat.id)
           .order("created_at", { ascending: false });
@@ -111,7 +110,7 @@ const CategoryPage = () => {
         ) : (
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => (
-              <Link key={p.id} to={`/produto/${p.slug}`}>
+              <Link key={p.id} to={`/produto/${p.id}`}>
                 <ProductCard
                   image={getProductImage(p)}
                   name={p.name}
