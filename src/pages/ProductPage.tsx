@@ -20,7 +20,6 @@ interface ProductVariant {
 interface ProductDetail {
   id: string;
   name: string;
-  slug: string;
   description: string | null;
   short_description: string | null;
   price: number;
