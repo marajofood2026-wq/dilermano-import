@@ -48,7 +48,6 @@ const Products = () => {
   const handleEdit = (p: Product) => {
     setEditForm({
       name: p.name,
-      slug: p.slug,
       price: String(p.price),
       original_price: p.original_price ? String(p.original_price) : "",
       stock_quantity: String(p.stock_quantity),

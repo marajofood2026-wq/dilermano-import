@@ -507,7 +507,7 @@ export type Database = {
           price: number
           short_description: string | null
           sku: string | null
-          slug: string
+          slug: string | null
           stock_quantity: number
           tags: string[] | null
           updated_at: string
@@ -533,7 +533,7 @@ export type Database = {
           price: number
           short_description?: string | null
           sku?: string | null
-          slug: string
+          slug?: string | null
           stock_quantity?: number
           tags?: string[] | null
           updated_at?: string
@@ -559,7 +559,7 @@ export type Database = {
           price?: number
           short_description?: string | null
           sku?: string | null
-          slug?: string
+          slug?: string | null
           stock_quantity?: number
           tags?: string[] | null
           updated_at?: string
