@@ -44,7 +44,7 @@ const CategoryPage = () => {
         setCategoryName("Promoções");
         const { data } = await supabase
           .from("products")
-          .select("id, name, slug, price, original_price, tags, is_featured, product_images(url, is_primary)")
+          .select("id, name, price, original_price, tags, is_featured, product_images(url, is_primary)")
           .eq("is_active", true)
           .not("original_price", "is", null)
           .order("created_at", { ascending: false });
