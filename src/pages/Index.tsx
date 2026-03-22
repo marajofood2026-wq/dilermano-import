@@ -108,7 +108,7 @@ const Index = () => {
 
   const getImage = (p: Product) => {
     const primary = p.product_images?.find((img) => img.is_primary);
-    return primary?.url || p.product_images?.[0]?.url || fallbackImages[p.slug] || "/placeholder.svg";
+    return primary?.url || p.product_images?.[0]?.url || "/placeholder.svg";
   };
 
   const getBadge = (p: Product): "novo" | "sale" | undefined => {
