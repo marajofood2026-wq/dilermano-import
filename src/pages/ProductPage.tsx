@@ -56,15 +56,15 @@ const ProductPage = () => {
       setLoading(true);
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, description, short_description, price, original_price, stock_quantity, brand, tags, is_new, categories(name), product_images(url, alt_text, is_primary, sort_order), product_variants(id, name, stock_quantity, price_override, attributes)")
-        .eq("slug", slug)
+        .select("id, name, description, short_description, price, original_price, stock_quantity, brand, tags, is_new, categories(name), product_images(url, alt_text, is_primary, sort_order), product_variants(id, name, stock_quantity, price_override, attributes)")
+        .eq("id", id)
         .eq("is_active", true)
         .maybeSingle();
       setProduct(data as any);
       setLoading(false);
     };
     fetchProduct();
-  }, [slug]);
+  }, [id]);
 
   // Derive available colors and sizes
   const variants = product?.product_variants || [];
