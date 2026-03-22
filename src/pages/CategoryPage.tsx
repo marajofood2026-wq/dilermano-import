@@ -110,7 +110,7 @@ const CategoryPage = () => {
         ) : (
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => (
-              <Link key={p.id} to={`/produto/${p.slug}`}>
+              <Link key={p.id} to={`/produto/${p.id}`}>
                 <ProductCard
                   image={getProductImage(p)}
                   name={p.name}
