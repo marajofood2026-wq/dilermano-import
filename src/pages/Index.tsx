@@ -96,7 +96,7 @@ const Index = () => {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
+        .select("id, name, price, original_price, tags, is_featured, is_new, categories(name), product_images(url, is_primary)")
         .eq("is_active", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
