@@ -166,7 +166,7 @@ const Index = () => {
       />
 
       {/* Categories */}
-      <section className="container py-16">
+      <section id="categorias" className="container py-16">
         <div className="mb-8 flex items-end justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-foreground">Categorias</h2>
