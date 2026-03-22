@@ -193,7 +193,7 @@ const Index = () => {
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
-            <Link key={product.id} to={`/produto/${product.slug}`}>
+            <Link key={product.id} to={`/produto/${product.id}`}>
               <ProductCard
                 image={getImage(product)}
                 name={product.name}
