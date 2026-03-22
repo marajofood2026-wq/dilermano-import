@@ -37,7 +37,6 @@ const fallbackImages: Record<string, string> = {
 interface Product {
   id: string;
   name: string;
-  slug: string;
   price: number;
   original_price: number | null;
   tags: string[] | null;
